@@ -1,7 +1,7 @@
 package com.ndipatri.iot.tracket
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.ndipatri.iot.tracket.ui.main.MainFragment
 
 class MainActivity : AppCompatActivity() {
