@@ -13,3 +13,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+particle/workbench/tRacket/lib
+particle/workbench/tRacket/target
+particle/workbench/tRacket/.vscode/.cortex-debug.peripherals.state.json
+particle/workbench/tRacket/.vscode/.cortex-debug.registers.state.json
+tRacket.cpp
