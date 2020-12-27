@@ -57,7 +57,6 @@ Adafruit_IO_Feed coopertownLocationFeed = aioClient.getFeed("coopertownLocationT
 // So pushing data with format 'dataValue, lat, long, elevation' will result in a single
 // data point (which is ignored), but it will have lat/long meta data attached.
 Adafruit_MQTT_Publish coopertownLatLongMQTTPublish = Adafruit_MQTT_Publish(&mqtt,  AIO_USERNAME "/feeds/coopertownLocation/csv");
-Adafruit_IO_Feed coopertownLatLongFeed = aioClient.getFeed("coopertownLocationT3/csv");
 
 // Chip enabl for GPS module.
 int GPS_MODULE_ENABLE_OUTPUT_PIN = D6; 
@@ -236,7 +235,6 @@ void sendLatLongToCloud(double lat, double lng) {
     MQTTconnect();
 
     coopertownLatLongMQTTPublish.publish("0," + String(lat) + "," + String(lng) + ",10");
-    coopertownLatLongFeed.send("0," + String(lat) + "," + String(lng) + ",10");
 
     mqtt.disconnect();
 }
@@ -357,7 +355,7 @@ bool measureForTamper() {
                 //Particle.publish("tamperSample", "tamperChange=" + String(tamperChange), 60, PUBLIC);
             }
 
-            tampered = tamperChange > 20; // change percent
+            tampered = tamperChange > 30; // change percent
         }
 
         lastTamperSample = tamperSample;
