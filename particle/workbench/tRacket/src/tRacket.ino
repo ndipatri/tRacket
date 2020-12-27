@@ -3,6 +3,8 @@
 #include "LIS3DH.h"
 #include "google-maps-device-locator.h"
 #include <TinyGPS++/TinyGPS++.h>
+#include "Adafruit_MQTT.h"
+#include "Adafruit_MQTT_SPARK.h"
 
 // GPS
 SYSTEM_THREAD(ENABLED);
@@ -26,7 +28,10 @@ LIS3DHI2C tamperMeter(Wire, 0, WKP);
 // If you check in this code WITH this KEY defined, it will be detected by IO.Adafruit
 // and the WILL DISABLE THIS KEY!!!  So please delete value below before checking in!
 // ***************** !!!!!!!!!!!!!! **********
-#define AIO_KEY "aio_veFI12ZLFiXpgbvoZOBeHUw4dJRu" // Adafruit IO AIO Key
+#define AIO_KEY         "aio_veFI12ZLFiXpgbvoZOBeHUw4dJRu" // Adafruit IO AIO Key
+#define AIO_SERVER      "io.adafruit.com"
+#define AIO_SERVERPORT  1883                   // use 8883 for SSL
+#define AIO_USERNAME    "ndipatri" 
 // ***************** !!!!!!!!!!!!!! **********
 
 TCPClient client; // TCP Client used by Adafruit IO library
@@ -35,13 +40,24 @@ TCPClient client; // TCP Client used by Adafruit IO library
 // Adafruit IO remote endpoint.. 
 Adafruit_IO_Client aioClient = Adafruit_IO_Client(client, AIO_KEY);
 
+Adafruit_MQTT_SPARK mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
+
+
 // These will automatically generate new feeds on the account defined by AIO_KEY
 // https://io.adafruit.com/ndipatri/feeds/coopertownOccupiedT1
 Adafruit_IO_Feed coopertownOccupiedFeed = aioClient.getFeed("coopertownOccupiedT1");
 Adafruit_IO_Feed coopertownTamperFeed = aioClient.getFeed("coopertownTamperT1");
 Adafruit_IO_Feed coopertownRechargeFeed = aioClient.getFeed("coopertownRechargeT1");
+
+// Used by Google Location sevice which, given our GPS module, is redudant.
 Adafruit_IO_Feed coopertownLocationFeed = aioClient.getFeed("coopertownLocationT1");
-Adafruit_IO_Feed coopertownLatLongFeed = aioClient.getFeed("coopertownLatLongT1");
+
+// We need to use MQTT protocol to transfer lat/lng information to Adafruit
+// The '/csv' postfix is magic that treat the incoming data as a single entry
+// So pushing data with format 'dataValue, lat, long, elevation' will result in a single
+// data point (which is ignored), but it will have lat/long meta data attached.
+Adafruit_MQTT_Publish coopertownLatLongMQTTPublish = Adafruit_MQTT_Publish(&mqtt,  AIO_USERNAME "/feeds/coopertownLocation/csv");
+Adafruit_IO_Feed coopertownLatLongFeed = aioClient.getFeed("coopertownLocationT3/csv");
 
 // Chip enabl for GPS module.
 int GPS_MODULE_ENABLE_OUTPUT_PIN = D6; 
@@ -202,8 +218,9 @@ void checkForAndPublishGPSFix() {
                 if (gps.location.isValid()) {
 
                     Particle.publish("gpsUpdate", "lat:" + String(gps.location.lat()) + ", lon:" + String(gps.location.lng()), 60, PUBLIC);
-                    //coopertownLatLongFeed.send(String(millis()), String(gps.location.lat()), String(gps.location.lng());
                     foundAndReportedGPSFix = true;
+
+                    sendLatLongToCloud(gps.location.lat(), gps.location.lng());
 
                     // Turn off GPS module
                     digitalWrite(GPS_MODULE_ENABLE_OUTPUT_PIN, HIGH);
@@ -211,6 +228,35 @@ void checkForAndPublishGPSFix() {
             }
         }
     }
+}
+
+void sendLatLongToCloud(double lat, double lng) {
+
+    Particle.publish("gpsUpdate", "Connecting to MQTT Server", 60, PUBLIC);
+    MQTTconnect();
+
+    coopertownLatLongMQTTPublish.publish("0," + String(lat) + "," + String(lng) + ",10");
+    coopertownLatLongFeed.send("0," + String(lat) + "," + String(lng) + ",10");
+
+    mqtt.disconnect();
+}
+
+void MQTTconnect() {
+  int8_t ret;
+
+  // Stop if already connected.
+  if (mqtt.connected()) {
+    return;
+  }
+
+  Particle.publish("gpsUpdate", "Connecting to Adafruit IO MQTT Server", 60, PUBLIC);
+
+  while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
+       Particle.publish("gpsUpdate", "Retrying MQTT connect from error: " + String(mqtt.connectErrorString(ret)), 60, PUBLIC);
+       mqtt.disconnect();
+       delay(5000);  // wait 5 seconds
+  }
+  Particle.publish("gpsUpdate", "MQTT Connected!", 60, PUBLIC);
 }
 
 bool checkForTamper() {
