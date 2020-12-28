@@ -1,13 +1,11 @@
 package com.ndipatri.iot.tracket.ui.main
 
-import android.R
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
-import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider

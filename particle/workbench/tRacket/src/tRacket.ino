@@ -1,7 +1,6 @@
 #include <Adafruit_IO_Client.h>
 #include "adafruit-ina219.h"
 #include "LIS3DH.h"
-#include "google-maps-device-locator.h"
 #include <TinyGPS++/TinyGPS++.h>
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_SPARK.h"
@@ -9,11 +8,9 @@
 // GPS
 SYSTEM_THREAD(ENABLED);
 TinyGPSPlus gps;
+
 // We only find one GPS fix during startup and then we shut down the GPS module.
 bool foundAndReportedGPSFix = false;
-
-// see https://github.com/particle-iot/google-maps-device-locator#firmware-library-api
-GoogleMapsDeviceLocator googleMapsLocator;
 
 // The current meter we will use to determine when battery needs to be
 // recharged.
@@ -31,7 +28,7 @@ LIS3DHI2C tamperMeter(Wire, 0, WKP);
 #define AIO_KEY         "aio_veFI12ZLFiXpgbvoZOBeHUw4dJRu" // Adafruit IO AIO Key
 #define AIO_SERVER      "io.adafruit.com"
 #define AIO_SERVERPORT  1883                   // use 8883 for SSL
-#define AIO_USERNAME    "ndipatri" 
+String AIO_USERNAME     = "ndipatri";
 // ***************** !!!!!!!!!!!!!! **********
 
 TCPClient client; // TCP Client used by Adafruit IO library
@@ -45,18 +42,22 @@ Adafruit_MQTT_SPARK mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_
 
 // These will automatically generate new feeds on the account defined by AIO_KEY
 // https://io.adafruit.com/ndipatri/feeds/coopertownOccupiedT1
-Adafruit_IO_Feed coopertownOccupiedFeed = aioClient.getFeed("coopertownOccupiedT1");
-Adafruit_IO_Feed coopertownTamperFeed = aioClient.getFeed("coopertownTamperT1");
-Adafruit_IO_Feed coopertownRechargeFeed = aioClient.getFeed("coopertownRechargeT1");
 
-// Used by Google Location sevice which, given our GPS module, is redudant.
-Adafruit_IO_Feed coopertownLocationFeed = aioClient.getFeed("coopertownLocationT1");
+String occupiedFeedName = System.deviceID() + "Occupancy"; 
+Adafruit_IO_Feed occupancyFeed = aioClient.getFeed(occupiedFeedName);
+
+String tamperFeedName = System.deviceID() + "Tamper"; 
+Adafruit_IO_Feed tamperFeed = aioClient.getFeed(tamperFeedName);
+
+String rechargeFeedName = System.deviceID() + "Recharge"; 
+Adafruit_IO_Feed rechargeFeed = aioClient.getFeed(rechargeFeedName);
 
 // We need to use MQTT protocol to transfer lat/lng information to Adafruit
 // The '/csv' postfix is magic that treat the incoming data as a single entry
 // So pushing data with format 'dataValue, lat, long, elevation' will result in a single
 // data point (which is ignored), but it will have lat/long meta data attached.
-Adafruit_MQTT_Publish coopertownLatLongMQTTPublish = Adafruit_MQTT_Publish(&mqtt,  AIO_USERNAME "/feeds/coopertownLocation/csv");
+String mqttFeedName = AIO_USERNAME + "/feeds/Location/csv"; 
+Adafruit_MQTT_Publish locationMQTTTopic = Adafruit_MQTT_Publish(&mqtt,  mqttFeedName);
 
 // Chip enabl for GPS module.
 int GPS_MODULE_ENABLE_OUTPUT_PIN = D6; 
@@ -94,9 +95,6 @@ void setup() {
     pinMode(GPS_MODULE_ENABLE_OUTPUT_PIN, OUTPUT);
     digitalWrite(GPS_MODULE_ENABLE_OUTPUT_PIN, LOW);
 
-    // This device is stationary.
-    googleMapsLocator.withSubscribe(locationCallback).withLocateOnce();
-
     // For accelerometer
 	Wire.setSpeed(CLOCK_SPEED_100KHZ);
 	Wire.begin();
@@ -118,15 +116,9 @@ void setup() {
     checkBattery(true);
 }
 
-void locationCallback(float lat, float lon, float accuracy) {
-    coopertownLocationFeed.send("Location acquired: " + String(lat) + ", " + String(lon));
-}
-
 void loop() {
 
     checkForAndPublishGPSFix();
-
-    googleMapsLocator.loop();
 
     if (PLATFORM_ID != PLATFORM_ARGON && PLATFORM_ID != PLATFORM_BORON) {
         Particle.publish("TERMINAL", "Must be run on Argon or Boron", 60, PUBLIC);
@@ -234,7 +226,8 @@ void sendLatLongToCloud(double lat, double lng) {
     Particle.publish("gpsUpdate", "Connecting to MQTT Server", 60, PUBLIC);
     MQTTconnect();
 
-    coopertownLatLongMQTTPublish.publish("0," + String(lat) + "," + String(lng) + ",10");
+    String deviceIdString = System.deviceID();
+    locationMQTTTopic.publish(deviceIdString + "," + String(lat) + "," + String(lng) + ",10");
 
     mqtt.disconnect();
 }
@@ -266,7 +259,7 @@ bool checkForTamper() {
 
         if (!isTamperDetected()) {
             // We only want to send positive edge to feed. 
-            coopertownTamperFeed.send(true); 
+            tamperFeed.send(true); 
         }
 
         lastTamperTimeMillis = millis();
@@ -285,7 +278,7 @@ bool checkForMotion() {
 
         if (!isMotionDetected()) {
             // We only want to send positive edge to feed. 
-            coopertownOccupiedFeed.send(true); 
+            occupancyFeed.send(true); 
         }
 
         lastMotionTimeMillis = millis();
@@ -296,7 +289,7 @@ bool checkForMotion() {
 
 void resetTamper() {
     lastTamperTimeMillis = -1L;
-    coopertownTamperFeed.send(false); 
+    tamperFeed.send(false); 
     if (PLATFORM_ID == PLATFORM_ARGON) {
         Particle.publish("activityReport", "tamperReset", 60, PUBLIC);
     }
@@ -304,7 +297,7 @@ void resetTamper() {
 
 void resetMotion() {
     lastMotionTimeMillis = -1L;
-    coopertownOccupiedFeed.send(false); 
+    occupancyFeed.send(false); 
     if (PLATFORM_ID == PLATFORM_ARGON) {
         Particle.publish("activityReport", "motionReset", 60, PUBLIC);
     }
@@ -335,7 +328,8 @@ void checkBattery(bool force) {
     if (force || (batteryNeedsChargingNow != batteryNeedsCharging)) {
         batteryNeedsCharging = batteryNeedsChargingNow;
 
-        coopertownRechargeFeed.send(batteryNeedsCharging ? "RECHARGE" : "GOOD"); 
+        Particle.publish("checkBattery", "batteryVoltageLevel=" + String(batteryVoltageLevel), 60, PUBLIC);
+        rechargeFeed.send(batteryNeedsCharging ? "RECHARGE" : "GOOD"); 
     }
 }
 
