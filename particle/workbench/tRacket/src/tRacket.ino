@@ -68,8 +68,12 @@ int MOTION_SENSOR_DETECTED_INPUT_PIN = D8;
 // We want to indicate when we are actively listening to sensor input
 int MOTION_LISTENING_LED_OUTPUT_PIN = D7; 
 
-// At this voltage, the battery should be recharged.
-float BATTERY_CHARGE_THRESHOLD_VOLTS = 12.2;
+// We need a HIGH and LOW value to implement a 'Schmitt Trigger' for
+// voltage measurement.  Otherwise, we get oscilation of value around
+// a single threshold.
+float BATTERY_CHARGE_THRESHOLD_VOLTS_HIGH = 12.6;
+float BATTERY_CHARGE_THRESHOLD_VOLTS_LOW = 12.2;
+
 bool batteryNeedsCharging = false;
 double batteryVoltageLevel = 0.0;
 
@@ -83,6 +87,8 @@ int lastTamperSample = 0;
 
 long MOTION_POLL_DURATION_MINUTES = 3;
 long TAMPER_POLL_DURATION_MINUTES = 1;
+
+bool firstPass = true;
 
 void setup() {
 
@@ -113,11 +119,9 @@ void setup() {
 
     resetTamper();
     resetMotion();
-    checkBattery(true);
 }
 
 void loop() {
-
     checkForAndPublishGPSFix();
 
     if (PLATFORM_ID != PLATFORM_ARGON && PLATFORM_ID != PLATFORM_BORON) {
@@ -181,7 +185,8 @@ void loop() {
 
     digitalWrite(MOTION_LISTENING_LED_OUTPUT_PIN, LOW);
 
-    checkBattery(false);
+    checkBattery(firstPass);
+    firstPass = false;
 
     if (PLATFORM_ID == PLATFORM_ARGON) {
         delay(20000);
@@ -193,7 +198,7 @@ void loop() {
             .mode(SystemSleepMode::STOP)
             .network(NETWORK_INTERFACE_CELLULAR)
             .flag(SystemSleepFlag::WAIT_CLOUD)
-            .duration(5min);
+            .duration(2min);
         System.sleep(config);
     }
 }
@@ -315,22 +320,36 @@ int minutesSinceLastMotion() {
     return (int)((millis() - lastMotionTimeMillis)/60000L);
 }
 
-void checkBattery(bool force) {
+void checkBattery(bool forceSendUpdate) {
     float shuntvoltage = powerMeter.getShuntVoltage_mV();
     float busvoltage = powerMeter.getBusVoltage_V();
     batteryVoltageLevel = busvoltage + (shuntvoltage / 1000);
 
+    // We implement a Schmitt Trigger.  The two thresholds prevent 'oscillating'
+    // that occurs with a single threshold.
     bool batteryNeedsChargingNow = false;
-    if (batteryVoltageLevel <= BATTERY_CHARGE_THRESHOLD_VOLTS) {
+
+    if (batteryNeedsCharging && (batteryVoltageLevel > BATTERY_CHARGE_THRESHOLD_VOLTS_HIGH)) {
+        batteryNeedsChargingNow = false;
+    }
+
+    if (!batteryNeedsCharging && (batteryVoltageLevel < BATTERY_CHARGE_THRESHOLD_VOLTS_LOW)) {
         batteryNeedsChargingNow = true;
     }
 
-    if (force || (batteryNeedsChargingNow != batteryNeedsCharging)) {
+    if (forceSendUpdate || (batteryNeedsChargingNow != batteryNeedsCharging)) {
         batteryNeedsCharging = batteryNeedsChargingNow;
 
-        Particle.publish("checkBattery", "batteryVoltageLevel=" + String(batteryVoltageLevel), 60, PUBLIC);
-        rechargeFeed.send(batteryNeedsCharging ? "RECHARGE" : "GOOD"); 
+        sendBatteryStatus(batteryNeedsCharging, batteryVoltageLevel);
     }
+}
+
+void sendBatteryStatus(bool batteryNeedsCharging, float batteryVoltageLevel) {
+    if (PLATFORM_ID == PLATFORM_ARGON) {
+        Particle.publish("checkBattery", "batteryVoltageLevel=" + String(batteryVoltageLevel), 60, PUBLIC);
+    }
+
+    rechargeFeed.send((batteryNeedsCharging ? "RECHARGE" : "GOOD") + String("(") + String(batteryVoltageLevel) + String(")"));
 }
 
 bool measureForTamper() {
