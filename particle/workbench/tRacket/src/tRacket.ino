@@ -71,8 +71,8 @@ int MOTION_LISTENING_LED_OUTPUT_PIN = D7;
 // We need a HIGH and LOW value to implement a 'Schmitt Trigger' for
 // voltage measurement.  Otherwise, we get oscilation of value around
 // a single threshold.
-float BATTERY_CHARGE_THRESHOLD_VOLTS_HIGH = 12.6;
-float BATTERY_CHARGE_THRESHOLD_VOLTS_LOW = 12.2;
+float BATTERY_CHARGE_THRESHOLD_VOLTS_HIGH = 12.4;
+float BATTERY_CHARGE_THRESHOLD_VOLTS_LOW = 11.9;
 
 bool batteryNeedsCharging = false;
 double batteryVoltageLevel = 0.0;
@@ -327,18 +327,18 @@ void checkBattery(bool forceSendUpdate) {
 
     // We implement a Schmitt Trigger.  The two thresholds prevent 'oscillating'
     // that occurs with a single threshold.
-    bool batteryNeedsChargingNow = false;
+    bool currentBatteryNeedsCharging = batteryNeedsCharging;
 
     if (batteryNeedsCharging && (batteryVoltageLevel > BATTERY_CHARGE_THRESHOLD_VOLTS_HIGH)) {
-        batteryNeedsChargingNow = false;
+        currentBatteryNeedsCharging = false;
     }
 
     if (!batteryNeedsCharging && (batteryVoltageLevel < BATTERY_CHARGE_THRESHOLD_VOLTS_LOW)) {
-        batteryNeedsChargingNow = true;
+        currentBatteryNeedsCharging = true;
     }
 
-    if (forceSendUpdate || (batteryNeedsChargingNow != batteryNeedsCharging)) {
-        batteryNeedsCharging = batteryNeedsChargingNow;
+    if (forceSendUpdate || (currentBatteryNeedsCharging != batteryNeedsCharging)) {
+        batteryNeedsCharging = currentBatteryNeedsCharging;
 
         sendBatteryStatus(batteryNeedsCharging, batteryVoltageLevel);
     }
