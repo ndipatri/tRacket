@@ -59,11 +59,13 @@ Adafruit_IO_Feed rechargeFeed = aioClient.getFeed(rechargeFeedName);
 String mqttFeedName = AIO_USERNAME + "/feeds/Location/csv"; 
 Adafruit_MQTT_Publish locationMQTTTopic = Adafruit_MQTT_Publish(&mqtt,  mqttFeedName);
 
+
 // Chip enabl for GPS module.
 int GPS_MODULE_ENABLE_OUTPUT_PIN = D6; 
 
 // The sensor is configured NC (normally closed)
 int MOTION_SENSOR_DETECTED_INPUT_PIN = D8; 
+int MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN = D4; 
 
 // We want to indicate when we are actively listening to sensor input
 int MOTION_LISTENING_LED_OUTPUT_PIN = D7; 
@@ -86,7 +88,7 @@ long lastMotionTimeMillis = -1L;
 int lastTamperSample = 0;
 
 long MOTION_POLL_DURATION_MINUTES = 3;
-long TAMPER_POLL_DURATION_MINUTES = 1;
+long TAMPER_POLL_DURATION_SECONDS = 3;
 
 bool firstPass = true;
 
@@ -101,6 +103,10 @@ void setup() {
     pinMode(GPS_MODULE_ENABLE_OUTPUT_PIN, OUTPUT);
     digitalWrite(GPS_MODULE_ENABLE_OUTPUT_PIN, LOW);
 
+    // By default, LED on OFF when motion is triggered
+    pinMode(MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN, OUTPUT);
+    digitalWrite(MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN, LOW);
+
     // For accelerometer
 	Wire.setSpeed(CLOCK_SPEED_100KHZ);
 	Wire.begin();
@@ -113,12 +119,20 @@ void setup() {
 
     Particle.variable("minutesSinceLastMotion", minutesSinceLastMotion);
     Particle.variable("batteryVoltageLevel", batteryVoltageLevel);
+    Particle.variable("isMotionTestOn", isMotionTestOn);
+
+    Particle.function("turnOnMotionTest", turnOnMotionTest);
+    Particle.function("turnOffMotionTest", turnOffMotionTest);
+
 
     pinMode(MOTION_SENSOR_DETECTED_INPUT_PIN, INPUT_PULLUP);
     pinMode(MOTION_LISTENING_LED_OUTPUT_PIN, OUTPUT);
 
     resetTamper();
     resetMotion();
+
+    // default behavior
+    turnOnMotionTest("");
 }
 
 void loop() {
@@ -152,7 +166,7 @@ void loop() {
 
         // when triggered, motion sensor only indicates for 3 seconds...
         // so our poll interval has to be at least twice as fast (Nyquist Interval!)
-        delay(500);
+        delay(1000);
     }
     
     if (isMotionDetectedNow) {
@@ -161,10 +175,10 @@ void loop() {
         startTime = millis();
         bool isTamperDetectedNow = false;
         while(!isTamperDetectedNow &&
-              ((millis() - startTime) < (TAMPER_POLL_DURATION_MINUTES*60000))) {
+              ((millis() - startTime) < (TAMPER_POLL_DURATION_SECONDS*1000))) {
 
             isTamperDetectedNow = checkForTamper();
-            delay(500);
+            delay(250);
         }
     }
 
@@ -183,13 +197,13 @@ void loop() {
         resetMotion();
     }
 
-    digitalWrite(MOTION_LISTENING_LED_OUTPUT_PIN, LOW);
-
     checkBattery(firstPass);
     firstPass = false;
 
+    digitalWrite(MOTION_LISTENING_LED_OUTPUT_PIN, LOW);
+
     if (PLATFORM_ID == PLATFORM_ARGON) {
-        delay(20000);
+        delay(1000);
     } else {
         // assume this is Boron.. PLATFORM_BORON didn't seem to work properly
         // see https://docs.particle.io/reference/device-os/firmware/boron/#sleep
@@ -377,4 +391,30 @@ bool measureForTamper() {
     }
 
     return tampered;
+}
+
+int turnOnMotionTest(String _na) {
+
+    Particle.publish("config", "motionTest turned ON", 60, PUBLIC);
+    digitalWrite(MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN, HIGH);
+
+    return 1;
+}
+
+int turnOffMotionTest(String _na) {
+
+    Particle.publish("config", "motionTest turned OFF", 60, PUBLIC);
+    digitalWrite(MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN, LOW);
+
+    return 1;
+}
+
+String isMotionTestOn() {
+
+    bool isMotionTestOn = digitalRead(MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN) == LOW;
+    if (isMotionTestOn) {
+        return "no";
+    } else {
+        return "yes";
+    }
 }
