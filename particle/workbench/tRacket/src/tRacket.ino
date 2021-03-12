@@ -1,6 +1,5 @@
 #include <Adafruit_IO_Client.h>
 #include "adafruit-ina219.h"
-#include "LIS3DH.h"
 #include <TinyGPS++/TinyGPS++.h>
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_SPARK.h"
@@ -15,9 +14,6 @@ bool foundAndReportedGPSFix = false;
 // The current meter we will use to determine when battery needs to be
 // recharged.
 Adafruit_INA219 powerMeter;
-
-// We use this to detect if the device is being tampered
-LIS3DHI2C tamperMeter(Wire, 0, WKP);
 
 // This can be retrieved from https://io.adafruit.com/ndipatri/profile
 // (or if you aren't ndipatri, you can create an account for free)
@@ -44,9 +40,6 @@ Adafruit_MQTT_SPARK mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_
 
 String occupiedFeedName = System.deviceID() + "Occupancy"; 
 Adafruit_IO_Feed occupancyFeed = aioClient.getFeed(occupiedFeedName);
-
-String tamperFeedName = System.deviceID() + "Tamper"; 
-Adafruit_IO_Feed tamperFeed = aioClient.getFeed(tamperFeedName);
 
 String rechargeFeedName = System.deviceID() + "Recharge"; 
 Adafruit_IO_Feed rechargeFeed = aioClient.getFeed(rechargeFeedName);
@@ -80,14 +73,14 @@ double batteryVoltageLevel = 0.0;
 
 // If a monitored value is triggered we latch it for this time period so
 // external monitors have time to capture it
+//
+// This also has the effect of maintaining the 'occupied' state for the entire
+// duration a court is in use... it's a sort of low-pass filter
 long TRIGGER_SUSTAIN_INTERVAL_MILLIS = 10000;
 
-long lastTamperTimeMillis = -1L;
 long lastMotionTimeMillis = -1L;
-int lastTamperSample = 0;
 
 long MOTION_POLL_DURATION_MINUTES = 3;
-long TAMPER_POLL_DURATION_SECONDS = 3;
 
 bool firstPass = true;
 
@@ -109,9 +102,6 @@ void setup() {
     // For accelerometer
 	Wire.setSpeed(CLOCK_SPEED_100KHZ);
 	Wire.begin();
-	LIS3DHConfig config;
-	config.setAccelMode(LIS3DH::RATE_100_HZ);
-	bool setupSuccess = tamperMeter.setup(config);
 
     powerMeter.begin();
     powerMeter.setCalibration_16V_400mA();
@@ -127,7 +117,6 @@ void setup() {
     pinMode(MOTION_SENSOR_DETECTED_INPUT_PIN, INPUT_PULLUP);
     pinMode(MOTION_LISTENING_LED_OUTPUT_PIN, OUTPUT);
 
-    resetTamper();
     resetMotion();
 
     // default behavior
@@ -152,44 +141,34 @@ void loop() {
 
     long startTime = millis();
 
-    // stay awake until we hear motion/tamper or we reach MOTION_POLL_DURATION_MINUTES
+    // stay awake until we hear motion or we reach MOTION_POLL_DURATION_MINUTES
     bool isMotionDetectedNow = false;
-    bool isTamperDetectedNow = false;
-    while(!isTamperDetectedNow &&
-          !isMotionDetectedNow && 
+    while(!isMotionDetectedNow && 
           ((millis() - startTime) < (MOTION_POLL_DURATION_MINUTES*60000))) {
 
-        isTamperDetectedNow = checkForTamper();
-
         isMotionDetectedNow = checkForMotion();
+
+        if (isMotionDetectedNow) {
+            if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
+                Particle.publish("activityReport", "motionDetected", 60, PUBLIC);
+            }
+
+            if (!currentlyInMotionPeriod()) {
+
+                // Now starting new motion period
+                occupancyFeed.send(true); 
+            }
+
+            // Detecting new motion extends our current motion period
+            lastMotionTimeMillis = millis();
+        }
 
         // when triggered, motion sensor only indicates for 3 seconds...
         // so our poll interval has to be at least twice as fast (Nyquist Interval!)
         delay(1000);
     }
     
-    if (isMotionDetectedNow) {
-
-        // We need to make sure our motion wasn't triggered due to a tamper.
-        startTime = millis();
-        bool isTamperDetectedNow = false;
-        while(!isTamperDetectedNow &&
-              ((millis() - startTime) < (TAMPER_POLL_DURATION_SECONDS*1000))) {
-
-            isTamperDetectedNow = checkForTamper();
-            delay(250);
-        }
-    }
-
-    // See if we need to clear our latches...
-    if (isTamperDetected() && 
-        (millis() - lastTamperTimeMillis) > TRIGGER_SUSTAIN_INTERVAL_MILLIS) {
-
-        // It's been long enough, we can clear out this trigger    
-        resetTamper();
-    }
-
-    if (isMotionDetected() && 
+    if (currentlyInMotionPeriod() && 
         (millis() - lastMotionTimeMillis) > TRIGGER_SUSTAIN_INTERVAL_MILLIS) {
 
         // It's been long enough, we can clear out this trigger    
@@ -274,49 +253,8 @@ void MQTTconnect() {
   Particle.publish("gpsUpdate", "MQTT Connected!", 60, PUBLIC);
 }
 
-bool checkForTamper() {
-    bool isTamperDetectedNow = measureForTamper();
-    if (isTamperDetectedNow) {
-        if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
-            Particle.publish("activityReport", "tamperDetected", 60, PUBLIC);
-        }
-
-        if (!isTamperDetected()) {
-            // We only want to send positive edge to feed. 
-            tamperFeed.send(true); 
-        }
-
-        lastTamperTimeMillis = millis();
-    }
-
-    return isTamperDetectedNow;
-}
-
 bool checkForMotion() {
-
-    bool isMotionDetectedNow = digitalRead(MOTION_SENSOR_DETECTED_INPUT_PIN) == LOW;
-    if (isMotionDetectedNow) {
-        if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
-            Particle.publish("activityReport", "motionDetected", 60, PUBLIC);
-        }
-
-        if (!isMotionDetected()) {
-            // We only want to send positive edge to feed. 
-            occupancyFeed.send(true); 
-        }
-
-        lastMotionTimeMillis = millis();
-    }
-
-    return isMotionDetectedNow;
-}
-
-void resetTamper() {
-    lastTamperTimeMillis = -1L;
-    tamperFeed.send(false); 
-    if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
-        Particle.publish("activityReport", "tamperReset", 60, PUBLIC);
-    }
+    return digitalRead(MOTION_SENSOR_DETECTED_INPUT_PIN) == LOW;
 }
 
 void resetMotion() {
@@ -327,11 +265,7 @@ void resetMotion() {
     }
 }
 
-bool isTamperDetected() {
-    return lastTamperTimeMillis > 0;
-}
-
-bool isMotionDetected() {
+bool currentlyInMotionPeriod() {
     return lastMotionTimeMillis > 0;
 }
 
@@ -369,33 +303,6 @@ void sendBatteryStatus(bool batteryNeedsCharging, float batteryVoltageLevel) {
     }
 
     rechargeFeed.send((batteryNeedsCharging ? "RECHARGE" : "GOOD") + String("(") + String(batteryVoltageLevel) + String(")"));
-}
-
-bool measureForTamper() {
-
-    bool tampered = false;
-
-    LIS3DHSample sample;
-    if (tamperMeter.getSample(sample)) {
-
-        int tamperSample = abs(sample.x + sample.y + sample.z);
-
-        if (lastTamperSample > 0) {
-            int tamperChange = (abs(tamperSample - lastTamperSample)/(float)lastTamperSample)*100.0;
-
-            if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
-                //Particle.publish("tamperSample", "tamperChange=" + String(tamperChange), 60, PUBLIC);
-            }
-
-            tampered = tamperChange > 30; // change percent
-        }
-
-        lastTamperSample = tamperSample;
-    } else {
-        Serial.println("no sample");
-    }
-
-    return tampered;
 }
 
 int turnOnMotionTest(String _na) {
