@@ -39,7 +39,6 @@ Adafruit_IO_Client aioClient = Adafruit_IO_Client(client, AIO_KEY);
 
 Adafruit_MQTT_SPARK mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
 
-
 // These will automatically generate new feeds on the account defined by AIO_KEY
 // https://io.adafruit.com/ndipatri/feeds/coopertownOccupiedT1
 
@@ -145,7 +144,7 @@ void loop() {
         return;
     }
 
-    if (PLATFORM_ID == PLATFORM_ARGON) {
+    if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
         Particle.publish("activityReport", "awake", 60, PUBLIC);
     }
 
@@ -202,17 +201,23 @@ void loop() {
 
     digitalWrite(MOTION_LISTENING_LED_OUTPUT_PIN, LOW);
 
-    if (PLATFORM_ID == PLATFORM_ARGON) {
+    if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
         delay(1000);
     } else {
         // assume this is Boron.. PLATFORM_BORON didn't seem to work properly
         // see https://docs.particle.io/reference/device-os/firmware/boron/#sleep
         SystemSleepConfiguration config;
         config
+            // processor goes to sleep to save energy
             .mode(SystemSleepMode::STOP)
+
+            // keeps cellular running when sleeping processor, and also lets
+            // network be a wake source
             .network(NETWORK_INTERFACE_CELLULAR)
+
+            // make sure all cloud events have been acknowledged before sleeping
             .flag(SystemSleepFlag::WAIT_CLOUD)
-            .duration(2min);
+            .duration(1min);
         System.sleep(config);
     }
 }
@@ -272,7 +277,7 @@ void MQTTconnect() {
 bool checkForTamper() {
     bool isTamperDetectedNow = measureForTamper();
     if (isTamperDetectedNow) {
-        if (PLATFORM_ID == PLATFORM_ARGON) {
+        if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
             Particle.publish("activityReport", "tamperDetected", 60, PUBLIC);
         }
 
@@ -291,7 +296,7 @@ bool checkForMotion() {
 
     bool isMotionDetectedNow = digitalRead(MOTION_SENSOR_DETECTED_INPUT_PIN) == LOW;
     if (isMotionDetectedNow) {
-        if (PLATFORM_ID == PLATFORM_ARGON) {
+        if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
             Particle.publish("activityReport", "motionDetected", 60, PUBLIC);
         }
 
@@ -309,7 +314,7 @@ bool checkForMotion() {
 void resetTamper() {
     lastTamperTimeMillis = -1L;
     tamperFeed.send(false); 
-    if (PLATFORM_ID == PLATFORM_ARGON) {
+    if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
         Particle.publish("activityReport", "tamperReset", 60, PUBLIC);
     }
 }
@@ -317,7 +322,7 @@ void resetTamper() {
 void resetMotion() {
     lastMotionTimeMillis = -1L;
     occupancyFeed.send(false); 
-    if (PLATFORM_ID == PLATFORM_ARGON) {
+    if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
         Particle.publish("activityReport", "motionReset", 60, PUBLIC);
     }
 }
@@ -359,7 +364,7 @@ void checkBattery(bool forceSendUpdate) {
 }
 
 void sendBatteryStatus(bool batteryNeedsCharging, float batteryVoltageLevel) {
-    if (PLATFORM_ID == PLATFORM_ARGON) {
+    if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
         Particle.publish("checkBattery", "batteryVoltageLevel=" + String(batteryVoltageLevel), 60, PUBLIC);
     }
 
@@ -378,7 +383,7 @@ bool measureForTamper() {
         if (lastTamperSample > 0) {
             int tamperChange = (abs(tamperSample - lastTamperSample)/(float)lastTamperSample)*100.0;
 
-            if (PLATFORM_ID == PLATFORM_ARGON) {
+            if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
                 //Particle.publish("tamperSample", "tamperChange=" + String(tamperChange), 60, PUBLIC);
             }
 
@@ -409,12 +414,6 @@ int turnOffMotionTest(String _na) {
     return 1;
 }
 
-String isMotionTestOn() {
-
-    bool isMotionTestOn = digitalRead(MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN) == LOW;
-    if (isMotionTestOn) {
-        return "no";
-    } else {
-        return "yes";
-    }
+bool isMotionTestOn() {
+    return digitalRead(MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN) == HIGH;
 }
