@@ -59,6 +59,15 @@ int GPS_MODULE_ENABLE_OUTPUT_PIN = D6;
 int MOTION_SENSOR_DETECTED_INPUT_PIN = D8; 
 int MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN = D4; 
 
+// Keep track of when this device was powered up
+long startTimeMillis;
+// How long we keep the device in test mode after startup
+long STARTUP_TEST_MODE_PERIOD_MINUTES = 15;
+
+// We always enter test mode upon startup and we want to expire
+// that particular test session
+bool inStartupTestPeriod = true;
+
 // We want to indicate when we are actively listening to sensor input
 int MOTION_LISTENING_LED_OUTPUT_PIN = D7; 
 
@@ -76,7 +85,7 @@ double batteryVoltageLevel = 0.0;
 //
 // This also has the effect of maintaining the 'occupied' state for the entire
 // duration a court is in use... it's a sort of low-pass filter
-long TRIGGER_SUSTAIN_INTERVAL_MILLIS = 10000;
+long TRIGGER_SUSTAIN_INTERVAL_MINUTES = 6;
 
 long lastMotionTimeMillis = -1L;
 
@@ -85,7 +94,7 @@ long MOTION_POLL_DURATION_MINUTES = 3;
 bool firstPass = true;
 
 void setup() {
-
+    
     Serial.begin(115200);
 
     // The Adafruit GPS module is connected to Serial1 and D6
@@ -108,10 +117,10 @@ void setup() {
 
     Particle.variable("minutesSinceLastMotion", minutesSinceLastMotion);
     Particle.variable("batteryVoltageLevel", batteryVoltageLevel);
-    Particle.variable("isMotionTestOn", isMotionTestOn);
+    Particle.variable("isInTestMode", isInTestMode);
 
-    Particle.function("turnOnMotionTest", turnOnMotionTest);
-    Particle.function("turnOffMotionTest", turnOffMotionTest);
+    Particle.function("turnOnTestMode", turnOnTestMode);
+    Particle.function("turnOffTestMode", turnOffTestMode);
 
 
     pinMode(MOTION_SENSOR_DETECTED_INPUT_PIN, INPUT_PULLUP);
@@ -119,8 +128,11 @@ void setup() {
 
     resetMotion();
 
-    // default behavior
-    turnOnMotionTest("");
+    // We always enter test mode upon startup and we want to expire
+    // that particular test session
+    turnOnTestMode("");
+    startTimeMillis = millis();
+    inStartupTestPeriod = true;
 }
 
 void loop() {
@@ -133,29 +145,26 @@ void loop() {
         return;
     }
 
-    if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
-        Particle.publish("activityReport", "awake", 60, PUBLIC);
-    }
+    publishParticleLog("activityReport", "awake");
 
     digitalWrite(MOTION_LISTENING_LED_OUTPUT_PIN, HIGH);
 
-    long startTime = millis();
+    long pollIntervalStartTimeMillis = millis();
 
     // stay awake until we hear motion or we reach MOTION_POLL_DURATION_MINUTES
     bool isMotionDetectedNow = false;
     while(!isMotionDetectedNow && 
-          ((millis() - startTime) < (MOTION_POLL_DURATION_MINUTES*60000))) {
+          ((millis() - pollIntervalStartTimeMillis) < (MOTION_POLL_DURATION_MINUTES*60000))) {
 
         isMotionDetectedNow = checkForMotion();
 
         if (isMotionDetectedNow) {
-            if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
-                Particle.publish("activityReport", "motionDetected", 60, PUBLIC);
-            }
+            publishParticleLog("activityReport", "motionDetected");
 
             if (!currentlyInMotionPeriod()) {
 
                 // Now starting new motion period
+                publishParticleLog("activityReport", "startMotionPeriod");
                 occupancyFeed.send(true); 
             }
 
@@ -169,18 +178,25 @@ void loop() {
     }
     
     if (currentlyInMotionPeriod() && 
-        (millis() - lastMotionTimeMillis) > TRIGGER_SUSTAIN_INTERVAL_MILLIS) {
+        !isMotionDetectedNow &&
+        (millis() - lastMotionTimeMillis) > (TRIGGER_SUSTAIN_INTERVAL_MINUTES * 60000)) {
 
-        // It's been long enough, we can clear out this trigger    
+        // We need to have a 'minimum motion period' so it can be picked up by
+        // external monitoring    
         resetMotion();
+
+        occupancyFeed.send(false); 
+        publishParticleLog("activityReport", "endMotionPeriod");
     }
 
     checkBattery(firstPass);
     firstPass = false;
 
+    expireStartupTestModeIfNecessary();
+
     digitalWrite(MOTION_LISTENING_LED_OUTPUT_PIN, LOW);
 
-    if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
+    if (PLATFORM_ID == PLATFORM_ARGON || isInTestMode()) {
         delay(1000);
     } else {
         // assume this is Boron.. PLATFORM_BORON didn't seem to work properly
@@ -198,6 +214,17 @@ void loop() {
             .flag(SystemSleepFlag::WAIT_CLOUD)
             .duration(1min);
         System.sleep(config);
+    }
+}
+
+void expireStartupTestModeIfNecessary() {
+    if (inStartupTestPeriod &&
+        millis() - startTimeMillis > (STARTUP_TEST_MODE_PERIOD_MINUTES * 60000)) {
+
+        publishParticleLog("activityReport", "endStartupTestMode");
+
+        inStartupTestPeriod = false;
+        turnOffTestMode("");
     }
 }
 
@@ -259,10 +286,6 @@ bool checkForMotion() {
 
 void resetMotion() {
     lastMotionTimeMillis = -1L;
-    occupancyFeed.send(false); 
-    if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
-        Particle.publish("activityReport", "motionReset", 60, PUBLIC);
-    }
 }
 
 bool currentlyInMotionPeriod() {
@@ -298,29 +321,33 @@ void checkBattery(bool forceSendUpdate) {
 }
 
 void sendBatteryStatus(bool batteryNeedsCharging, float batteryVoltageLevel) {
-    if (PLATFORM_ID == PLATFORM_ARGON || isMotionTestOn()) {
-        Particle.publish("checkBattery", "batteryVoltageLevel=" + String(batteryVoltageLevel), 60, PUBLIC);
-    }
+    publishParticleLog("checkBattery", "batteryVoltageLevel=" + String(batteryVoltageLevel));
 
     rechargeFeed.send((batteryNeedsCharging ? "RECHARGE" : "GOOD") + String("(") + String(batteryVoltageLevel) + String(")"));
 }
 
-int turnOnMotionTest(String _na) {
+int turnOnTestMode(String _na) {
 
-    Particle.publish("config", "motionTest turned ON", 60, PUBLIC);
+    Particle.publish("config", "testMode turned ON", 60, PUBLIC);
     digitalWrite(MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN, HIGH);
 
     return 1;
 }
 
-int turnOffMotionTest(String _na) {
+int turnOffTestMode(String _na) {
 
-    Particle.publish("config", "motionTest turned OFF", 60, PUBLIC);
+    Particle.publish("config", "testMode turned OFF", 60, PUBLIC);
     digitalWrite(MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN, LOW);
 
     return 1;
 }
 
-bool isMotionTestOn() {
+bool isInTestMode() {
     return digitalRead(MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN) == HIGH;
+}
+
+void publishParticleLog(String group, String message) {
+    if (PLATFORM_ID == PLATFORM_ARGON || isInTestMode()) {
+        Particle.publish(group, message, 60, PUBLIC);
+    }
 }
