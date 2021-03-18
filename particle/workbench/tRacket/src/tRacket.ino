@@ -38,7 +38,9 @@ Adafruit_MQTT_SPARK mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_
 // These will automatically generate new feeds on the account defined by AIO_KEY
 // https://io.adafruit.com/ndipatri/feeds/coopertownOccupiedT1
 
-String occupiedFeedName = System.deviceID() + "Occupancy"; 
+// NJD TODO - For now push de-normalized data to one feed so it's easier for client..
+// eventually should push to separate occupancy feed per device
+String occupiedFeedName = "Occupancy"; 
 Adafruit_IO_Feed occupancyFeed = aioClient.getFeed(occupiedFeedName);
 
 String rechargeFeedName = System.deviceID() + "Recharge"; 
@@ -93,6 +95,10 @@ long MOTION_POLL_DURATION_MINUTES = 3;
 
 bool firstPass = true;
 
+// Will remain empty until we get a callback from the cloud shortly
+// after startup
+String deviceName = "";
+
 void setup() {
     
     Serial.begin(115200);
@@ -122,7 +128,6 @@ void setup() {
     Particle.function("turnOnTestMode", turnOnTestMode);
     Particle.function("turnOffTestMode", turnOffTestMode);
 
-
     pinMode(MOTION_SENSOR_DETECTED_INPUT_PIN, INPUT_PULLUP);
     pinMode(MOTION_LISTENING_LED_OUTPUT_PIN, OUTPUT);
 
@@ -133,9 +138,12 @@ void setup() {
     turnOnTestMode("");
     startTimeMillis = millis();
     inStartupTestPeriod = true;
+
 }
 
 void loop() {
+    checkForDeviceName();
+
     checkForAndPublishGPSFix();
 
     if (PLATFORM_ID != PLATFORM_ARGON && PLATFORM_ID != PLATFORM_BORON) {
@@ -164,8 +172,12 @@ void loop() {
             if (!currentlyInMotionPeriod()) {
 
                 // Now starting new motion period
-                publishParticleLog("activityReport", "startMotionPeriod");
-                occupancyFeed.send(true); 
+                if (deviceName.equals("")) {
+                    publishParticleLog("activityReport", "startMotionPeriod(noDeviceNameYet)");
+                } else {
+                    publishParticleLog("activityReport", "startMotionPeriod");
+                    occupancyFeed.send(String(deviceName) + ":1");
+                }
             }
 
             // Detecting new motion extends our current motion period
@@ -185,8 +197,12 @@ void loop() {
         // external monitoring    
         resetMotion();
 
-        occupancyFeed.send(false); 
-        publishParticleLog("activityReport", "endMotionPeriod");
+        if (deviceName.equals("")) {
+            publishParticleLog("activityReport", "endMotionPeriod(noDeviceNameYet");
+        } else {
+            publishParticleLog("activityReport", "endMotionPeriod");
+            occupancyFeed.send(String(deviceName) + ":0");
+        }
     }
 
     checkBattery(firstPass);
@@ -215,6 +231,18 @@ void loop() {
             .duration(1min);
         System.sleep(config);
     }
+}
+
+void checkForDeviceName() {
+    if (deviceName == "") {
+        Particle.subscribe("particle/device/name", nameHandler);
+        Particle.publish("particle/device/name");
+    }
+}
+
+void nameHandler(const char *topic, const char *data) {
+    publishParticleLog("activityReport", "deviceNameReceived:" + String(data));
+    deviceName = String(data);    
 }
 
 void expireStartupTestModeIfNecessary() {
