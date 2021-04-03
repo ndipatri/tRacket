@@ -21,7 +21,7 @@ Adafruit_INA219 powerMeter;
 // If you check in this code WITH this KEY defined, it will be detected by IO.Adafruit
 // and the WILL DISABLE THIS KEY!!!  So please delete value below before checking in!
 // ***************** !!!!!!!!!!!!!! **********
-#define AIO_KEY         "aio_veFI12ZLFiXpgbvoZOBeHUw4dJRu" // Adafruit IO AIO Key
+#define AIO_KEY         "aio_XmSy92vYjddoZhQ4f19ztFc8Qm6r" // Adafruit IO AIO Key
 #define AIO_SERVER      "io.adafruit.com"
 #define AIO_SERVERPORT  1883                   // use 8883 for SSL
 String AIO_USERNAME     = "ndipatri";
@@ -175,7 +175,7 @@ void loop() {
                 if (deviceName.equals("")) {
                     publishParticleLog("activityReport", "startMotionPeriod(noDeviceNameYet)");
                 } else {
-                    publishParticleLog("activityReport", "startMotionPeriod");
+                    publishParticleLog("activityReport", "startMotionPeriod(" + String(deviceName) + ")");
                     occupancyFeed.send(String(deviceName) + ":1");
                 }
             }
@@ -200,7 +200,7 @@ void loop() {
         if (deviceName.equals("")) {
             publishParticleLog("activityReport", "endMotionPeriod(noDeviceNameYet");
         } else {
-            publishParticleLog("activityReport", "endMotionPeriod");
+            publishParticleLog("activityReport", "endMotionPeriod(" + String(deviceName) + ")");
             occupancyFeed.send(String(deviceName) + ":0");
         }
     }
