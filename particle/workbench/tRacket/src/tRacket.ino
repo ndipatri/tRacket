@@ -14,7 +14,7 @@ Adafruit_INA219 powerMeter;
 // If you check in this code WITH this KEY defined, it will be detected by IO.Adafruit
 // and the WILL DISABLE THIS KEY!!!  So please delete value below before checking in!
 // ***************** !!!!!!!!!!!!!! **********
-#define AIO_KEY         "aio_XmSy92vYjddoZhQ4f19ztFc8Qm6r" // Adafruit IO AIO Key
+#define AIO_KEY         "xxx" // Adafruit IO AIO Key
 #define AIO_SERVER      "io.adafruit.com"
 #define AIO_SERVERPORT  1883                   // use 8883 for SSL
 String AIO_USERNAME     = "ndipatri";
@@ -115,6 +115,11 @@ void setup() {
 
     sendUnOccupiedToCloud();
 }
+
+
+
+
+
 
 void loop() {
 
