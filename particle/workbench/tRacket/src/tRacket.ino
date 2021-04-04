@@ -22,37 +22,24 @@ String AIO_USERNAME     = "ndipatri";
 
 TCPClient client; // TCP Client used by Adafruit IO library
 
-// Create the AIO client object.. This knows how to push data to the
-// Adafruit IO remote endpoint.. 
-Adafruit_IO_Client aioClient = Adafruit_IO_Client(client, AIO_KEY);
-
 Adafruit_MQTT_SPARK mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
 
-// These will automatically generate new feeds on the account defined by AIO_KEY
-// https://io.adafruit.com/ndipatri/feeds/coopertownOccupiedT1
+String mqttOccupancyTopicName = AIO_USERNAME + "/feeds/occupancy"; 
+Adafruit_MQTT_Publish occupancyMQTTTopic = Adafruit_MQTT_Publish(&mqtt,  mqttOccupancyTopicName);
 
-String rechargeFeedName = System.deviceID() + "Recharge"; 
-Adafruit_IO_Feed rechargeFeed = aioClient.getFeed(rechargeFeedName);
+String mqttRechargeTopicName = AIO_USERNAME + "/feeds/recharge"; 
+Adafruit_MQTT_Publish rechargeMQTTTopic = Adafruit_MQTT_Publish(&mqtt,  mqttRechargeTopicName);
 
-// We need to use MQTT protocol to transfer lat/lng information to Adafruit
-// The '/csv' postfix is magic that treat the incoming data as a single entry
-// So pushing data with format 'dataValue, lat, long, elevation' will result in a single
-// data point, but it will have lat/long meta data attached.
-String mqttOccupancyFeedName = AIO_USERNAME + "/feeds/Occupancy"; 
-Adafruit_MQTT_Publish occupancyMQTTTopic = Adafruit_MQTT_Publish(&mqtt,  mqttOccupancyFeedName);
+Adafruit_MQTT_Subscribe errors = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME + "/errors");
+Adafruit_MQTT_Subscribe throttle = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME + "/throttle");
 
 // The sensor is configured NC (normally closed)
 int MOTION_SENSOR_DETECTED_INPUT_PIN = D8; 
 int MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN = D4; 
 
-// Keep track of when this device was powered up
-long startTimeMillis;
 // How long we keep the device in test mode after startup
 long STARTUP_TEST_MODE_PERIOD_MINUTES = 15;
-
-// We always enter test mode upon startup and we want to expire
-// that particular test session
-bool inStartupTestPeriod = true;
+long testModeStartTimeMillis = -1;
 
 // We want to indicate when we are actively listening to sensor input
 int MOTION_LISTENING_LED_OUTPUT_PIN = D7; 
@@ -71,7 +58,7 @@ double batteryVoltageLevel = 0.0;
 //
 // This also has the effect of maintaining the 'occupied' state for the entire
 // duration a court is in use... it's a sort of low-pass filter
-long TRIGGER_SUSTAIN_INTERVAL_MINUTES = 6;
+long MOTION_PERIOD_INTERVAL_MINUTES = 6;
 
 long lastMotionTimeMillis = -1L;
 
@@ -83,6 +70,12 @@ bool firstPass = true;
 SYSTEM_THREAD(ENABLED);
 retained DeviceNameHelperData deviceNameHelperRetained;
 
+int SLEEP_START_HOUR = 21; // 9pm
+int SLEEP_STOP_HOUR = 6; // 6am duh.
+
+// Keeps track of the last time we synchronized our wall clock with
+// the server
+int lastClockSyncMillis = 0;
 
 void setup() {
     
@@ -91,7 +84,6 @@ void setup() {
     // This helps with retrieving Device name
     DeviceNameHelperRetained::instance().setup(&deviceNameHelperRetained);
     DeviceNameHelperRetained::instance().withCheckPeriod(24h);
-
 
     // By default, LED on OFF when motion is triggered
     pinMode(MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN, OUTPUT);
@@ -110,68 +102,64 @@ void setup() {
     pinMode(MOTION_SENSOR_DETECTED_INPUT_PIN, INPUT_PULLUP);
     pinMode(MOTION_LISTENING_LED_OUTPUT_PIN, OUTPUT);
 
-    resetMotion();
+    stopMotionPeriod();
+
+    // NJD TODO - If this were to move elsewhere, we could support something more
+    // dynamic.. but this is ok for now.
+    // Set time zone to Eastern USA daylight saving time
+    Time.zone(-4);
 
     // We always enter test mode upon startup and we want to expire
     // that particular test session
     turnOnTestMode("");
-    startTimeMillis = millis();
-    inStartupTestPeriod = true;
 
+    sendUnOccupiedToCloud();
 }
 
 void loop() {
+
+    if (handleIncorrectDevice()) {
+        return;
+    }
+    
+    // so everyone knows we're awake!
+    digitalWrite(MOTION_LISTENING_LED_OUTPUT_PIN, HIGH);
+
+    // Check to see if we know ou device name yet...
     DeviceNameHelperRetained::instance().loop();
 
-    if (PLATFORM_ID != PLATFORM_ARGON && PLATFORM_ID != PLATFORM_BORON) {
-        Particle.publish("TERMINAL", "Must be run on Argon or Boron", 60, PUBLIC);
+    // We need an accurate clock for when we go to sleep
+    syncWallClock();
 
-        delay(60000);
+    if (!deviceNameFound()) {
+        sleepForSeconds(5);
+
         return;
     }
 
-    publishParticleLog("activityReport", "awake");
+    // this can take minutes to execute
+    if (checkForMotion()) {
+        publishParticleLog("activityReport", "motionDetected");
 
-    digitalWrite(MOTION_LISTENING_LED_OUTPUT_PIN, HIGH);
+        if (!currentlyInMotionPeriod()) {
 
-    long pollIntervalStartTimeMillis = millis();
-
-    // stay awake until we hear motion or we reach MOTION_POLL_DURATION_MINUTES
-    bool isMotionDetectedNow = false;
-    while(!isMotionDetectedNow && 
-          ((millis() - pollIntervalStartTimeMillis) < (MOTION_POLL_DURATION_MINUTES*60000))) {
-
-        isMotionDetectedNow = checkForMotion();
-
-        if (isMotionDetectedNow && deviceNameFound()) {
-            publishParticleLog("activityReport", "motionDetected");
-
-            if (!currentlyInMotionPeriod()) {
-
-                // Now starting new motion period
-                publishParticleLog("activityReport", "startMotionPeriod(" + String(getDeviceName()) + ")");
-                sendOccupancyToCloud(String(getDeviceName()) + ":1");
-            }
-
-            // Detecting new motion extends our current motion period
-            lastMotionTimeMillis = millis();
+            // Starting new motion period
+            publishParticleLog("activityReport", "startMotionPeriod(" + String(getDeviceName()) + ")");
+            sendOccupiedToCloud();
         }
 
-        // when triggered, motion sensor only indicates for 3 seconds...
-        // so our poll interval has to be at least twice as fast (Nyquist Interval!)
-        delay(1000);
-    }
-    
-    if (currentlyInMotionPeriod() && 
-        !isMotionDetectedNow &&
-        (millis() - lastMotionTimeMillis) > (TRIGGER_SUSTAIN_INTERVAL_MINUTES * 60000)) {
+        // Detecting motion either starts or extends our current motion period
+        startMotionPeriod();
+    } else {
 
-        // We need to have a 'minimum motion period' so it can be picked up by
-        // external monitoring    
-        resetMotion();
+        // no current motion.. see if our motion period has expired yet...
+        if (hasMotionPeriodExpired()) {
 
-        publishParticleLog("activityReport", "endMotionPeriod(" + String(getDeviceName()) + ")");
-        sendOccupancyToCloud(String(getDeviceName()) + ":0");
+            stopMotionPeriod();
+
+            publishParticleLog("activityReport", "endMotionPeriod(" + String(getDeviceName()) + ")");
+            sendUnOccupiedToCloud();
+        }
     }
 
     checkBattery(firstPass);
@@ -179,26 +167,110 @@ void loop() {
 
     expireStartupTestModeIfNecessary();
 
+    // so everyone knows we're going to sleep!
     digitalWrite(MOTION_LISTENING_LED_OUTPUT_PIN, LOW);
 
-    if (PLATFORM_ID == PLATFORM_ARGON || isInTestMode()) {
+    // If it's during the day, this is only seconds, but if it's night
+    // it could be much longer!
+    getSomeSleep();
+}
+
+
+
+
+
+
+
+// this can take minutes to execute
+bool checkForMotion() {
+    long pollIntervalStartTimeMillis = millis();
+
+    // check for a bit of time
+    while((millis() - pollIntervalStartTimeMillis) < (MOTION_POLL_DURATION_MINUTES*60000)) {
+
+        if (digitalRead(MOTION_SENSOR_DETECTED_INPUT_PIN) == LOW) {
+            return true;
+        }
+
+        // when triggered, motion sensor only indicates for 3 seconds...
+        // so our poll interval has to be at least twice as fast (Nyquist Interval!)
         delay(1000);
+    }
+
+    return false;
+}
+
+bool handleIncorrectDevice() {
+    if (PLATFORM_ID != PLATFORM_ARGON && PLATFORM_ID != PLATFORM_BORON) {
+        Particle.publish("TERMINAL", "Must be run on Argon or Boron", 60, PUBLIC);
+
+        sleepForSeconds(60);
+
+        return true;
+    }
+
+    return false;
+}
+
+void getSomeSleep() {
+    if (PLATFORM_ID == PLATFORM_ARGON || isInTestMode()) {
+        sleepForSeconds(1);
     } else {
-        // assume this is Boron.. PLATFORM_BORON didn't seem to work properly
-        // see https://docs.particle.io/reference/device-os/firmware/boron/#sleep
-        SystemSleepConfiguration config;
-        config
-            // processor goes to sleep to save energy
-            .mode(SystemSleepMode::STOP)
 
-            // keeps cellular running when sleeping processor, and also lets
-            // network be a wake source
-            .network(NETWORK_INTERFACE_CELLULAR)
+        // we're on Boron and NOT in test mode!
 
-            // make sure all cloud events have been acknowledged before sleeping
-            .flag(SystemSleepFlag::WAIT_CLOUD)
-            .duration(1min);
-        System.sleep(config);
+        if (shouldBeAsleepForNight()) {
+            Particle.publish("activityReport", "good night!", 60, PUBLIC);
+
+            while (shouldBeAsleepForNight()) {
+                SystemSleepConfiguration config;
+                config
+                    // processor goes to sleep to save energy
+                    .mode(SystemSleepMode::STOP)
+
+                    // keeps cellular running when sleeping processor, and also lets
+                    // network be a wake source
+                    .network(NETWORK_INTERFACE_CELLULAR)
+
+                    // make sure all cloud events have been acknowledged before sleeping
+                    .flag(SystemSleepFlag::WAIT_CLOUD)
+                    .duration(30min); // wake up every half hour to see if it's wakey time 
+
+                sendUnOccupiedToCloud();
+                System.sleep(config);
+            }
+
+            Particle.publish("activityReport", "good morning!", 60, PUBLIC);
+        } else {
+
+            // We sleep longer every cycle when on Boron because we assume it's remote and needs
+            // to conserve more power.
+            sleepForSeconds(10);
+        }
+    }
+}
+
+void sleepForSeconds(int seconds) {
+    publishParticleLog("activityReport", "sleep");
+    delay(seconds * 1000);
+    publishParticleLog("activityReport", "awake");
+}
+
+bool shouldBeAsleepForNight() {
+    int currentHour = Time.hour();
+
+    return ((currentHour >= SLEEP_START_HOUR) ||
+            (currentHour < SLEEP_STOP_HOUR));
+}
+
+void syncWallClock() {
+    // manage wall clock.. since this device runs constantly, its clock can
+    // drift.
+    if (millis() - lastClockSyncMillis > 1000 * 60 * 60 * 24) { // once a day
+        // Request time synchronization from the Particle Device Cloud
+        publishParticleLog("syncWallClock", "syncTime!");
+        Particle.syncTime();
+        lastClockSyncMillis = millis();
     }
 }
 
@@ -211,26 +283,53 @@ char const* getDeviceName() {
 }
 
 void expireStartupTestModeIfNecessary() {
-    if (inStartupTestPeriod &&
-        millis() - startTimeMillis > (STARTUP_TEST_MODE_PERIOD_MINUTES * 60000)) {
+    if (isInTestMode() &&
+        millis() - testModeStartTimeMillis > (STARTUP_TEST_MODE_PERIOD_MINUTES * 60000)) {
 
         publishParticleLog("activityReport", "endStartupTestMode");
 
-        inStartupTestPeriod = false;
         turnOffTestMode("");
     }
 }
 
-void sendOccupancyToCloud(const char *occupancyMessage) {
+void sendOccupiedToCloud() {
+    sendMessageToCloud(String(getDeviceName()) + ":1", &occupancyMQTTTopic);
+}
 
+void sendUnOccupiedToCloud() {
+    sendMessageToCloud(String(getDeviceName()) + ":0", &occupancyMQTTTopic);
+}
+
+void sendBatteryStatusToCloud(bool batteryNeedsCharging, float batteryVoltageLevel) {
+
+    String message = String(getDeviceName()) + ":" + (batteryNeedsCharging ? "RECHARGE" : "GOOD") + String("(") + String(batteryVoltageLevel) + String(")");
+
+    sendMessageToCloud(message, &rechargeMQTTTopic);
+}
+
+void sendMessageToCloud(const char* message, Adafruit_MQTT_Publish* topic) {
     MQTTConnect();
 
-    occupancyMQTTTopic.publish(String(occupancyMessage) + "," + String(0) + "," + String(0) + ",10");
+    if (topic->publish(message)) {
+        publishParticleLog("mqtt", "Message SUCCESS (" + String(message) + ").");
+    } else {
+        publishParticleLog("mqtt", "Message FAIL (" + String(message) + ").");
+    }
 
-    publishParticleLog("mqtt", "Message sent (" + String(occupancyMessage) + ").");
+    // this is our 'wait for incoming subscription packets' busy subloop
+    // try to spend your time here
+    Adafruit_MQTT_Subscribe *subscription;
+    while ((subscription = mqtt.readSubscription(5000))) {
+        if(subscription == &errors) {
+            publishParticleLog("mqtt", "Error: (" + String((char *)errors.lastread) + ").");
+        } else if(subscription == &throttle) {
+            publishParticleLog("mqtt", "Throttle: (" + String((char *)throttle.lastread) + ").");
+        }
+    }
 
     MQTTDisconnect();
 }
+
 
 void MQTTConnect() {
     int8_t ret;
@@ -240,31 +339,32 @@ void MQTTConnect() {
         return;
     }
 
-    publishParticleLog("mqtt", "Connecting to MQTT server...");
-
     while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
         publishParticleLog("mqtt", "Retrying MQTT connect from error: " + String(mqtt.connectErrorString(ret)));
         mqtt.disconnect();
         delay(5000);  // wait 5 seconds
     }
-    publishParticleLog("mqtt", "MQTT Connected!");
 }
 
 void MQTTDisconnect() {
     mqtt.disconnect();
-    publishParticleLog("mqtt", "MQTT Connected!");
 }
 
-bool checkForMotion() {
-    return digitalRead(MOTION_SENSOR_DETECTED_INPUT_PIN) == LOW;
+void startMotionPeriod() {
+    lastMotionTimeMillis = millis();
 }
 
-void resetMotion() {
+void stopMotionPeriod() {
     lastMotionTimeMillis = -1L;
 }
 
 bool currentlyInMotionPeriod() {
     return lastMotionTimeMillis > 0;
+}
+
+bool hasMotionPeriodExpired() {
+    return currentlyInMotionPeriod() &&
+           ((millis() - lastMotionTimeMillis) > (MOTION_PERIOD_INTERVAL_MINUTES * 60000));
 }
 
 int minutesSinceLastMotion() {
@@ -291,20 +391,16 @@ void checkBattery(bool forceSendUpdate) {
     if (forceSendUpdate || (currentBatteryNeedsCharging != batteryNeedsCharging)) {
         batteryNeedsCharging = currentBatteryNeedsCharging;
 
-        sendBatteryStatus(batteryNeedsCharging, batteryVoltageLevel);
+        sendBatteryStatusToCloud(batteryNeedsCharging, batteryVoltageLevel);
     }
-}
-
-void sendBatteryStatus(bool batteryNeedsCharging, float batteryVoltageLevel) {
-    publishParticleLog("checkBattery", "batteryVoltageLevel=" + String(batteryVoltageLevel));
-
-    rechargeFeed.send((batteryNeedsCharging ? "RECHARGE" : "GOOD") + String("(") + String(batteryVoltageLevel) + String(")"));
 }
 
 int turnOnTestMode(String _na) {
 
     Particle.publish("config", "testMode turned ON", 60, PUBLIC);
     digitalWrite(MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN, HIGH);
+
+    testModeStartTimeMillis = millis();
 
     return 1;
 }
