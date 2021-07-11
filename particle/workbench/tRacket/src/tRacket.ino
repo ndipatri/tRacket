@@ -112,11 +112,7 @@ void setup() {
     // We always enter test mode upon startup and we want to expire
     // that particular test session
     turnOnTestMode("");
-
-    sendUnOccupiedToCloud();
 }
-
-
 
 
 void loop() {
