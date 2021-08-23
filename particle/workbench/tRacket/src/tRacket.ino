@@ -169,13 +169,8 @@ void loop() {
     // so everyone knows we're going to sleep!
     digitalWrite(MOTION_LISTENING_LED_OUTPUT_PIN, LOW);
 
-    // If it's during the day, this is only seconds, but if it's night
-    // it could be much longer!
-    getSomeSleep();
+    sleepForSeconds(2);
 }
-
-
-
 
 
 
@@ -209,44 +204,6 @@ bool handleIncorrectDevice() {
     }
 
     return false;
-}
-
-void getSomeSleep() {
-    if (PLATFORM_ID == PLATFORM_ARGON || isInTestMode()) {
-        sleepForSeconds(1);
-    } else {
-
-        // we're on Boron and NOT in test mode!
-
-        if (shouldBeAsleepForNight()) {
-            Particle.publish("activityReport", "good night!", 60, PUBLIC);
-            sendUnOccupiedToCloud();
-
-            while (shouldBeAsleepForNight()) {
-                SystemSleepConfiguration config;
-                config
-                    // processor goes to sleep to save energy
-                    .mode(SystemSleepMode::STOP)
-
-                    // keeps cellular running when sleeping processor, and also lets
-                    // network be a wake source
-                    .network(NETWORK_INTERFACE_CELLULAR)
-
-                    // make sure all cloud events have been acknowledged before sleeping
-                    .flag(SystemSleepFlag::WAIT_CLOUD)
-                    .duration(30min); // wake up every half hour to see if it's wakey time 
-
-                System.sleep(config);
-            }
-
-            Particle.publish("activityReport", "good morning!", 60, PUBLIC);
-        } else {
-
-            // We sleep longer every cycle when on Boron because we assume it's remote and needs
-            // to conserve more power.
-            sleepForSeconds(10);
-        }
-    }
 }
 
 void sleepForSeconds(int seconds) {
