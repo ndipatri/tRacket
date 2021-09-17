@@ -128,7 +128,9 @@ void loop() {
     DeviceNameHelperRetained::instance().loop();
 
     // We need an accurate clock for when we go to sleep
-    syncWallClock();
+    // NJD Disabling thing temporarily as I try to track down what's 
+    // causing device to have issues...
+    //syncWallClock();
 
     if (!deviceNameFound()) {
         sleepForSeconds(5);
