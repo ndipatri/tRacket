@@ -68,7 +68,6 @@ bool firstPass = true;
 
 // For deviceName retrieval and storage
 SYSTEM_THREAD(ENABLED);
-retained DeviceNameHelperData deviceNameHelperRetained;
 
 int SLEEP_START_HOUR = 21; // 9pm
 int SLEEP_STOP_HOUR = 6; // 6am duh.
@@ -82,8 +81,8 @@ void setup() {
     Serial.begin(115200);
 
     // This helps with retrieving Device name
-    DeviceNameHelperRetained::instance().setup(&deviceNameHelperRetained);
-    DeviceNameHelperRetained::instance().withCheckPeriod(24h);
+    DeviceNameHelperEEPROM::instance().setup(100);
+    DeviceNameHelperEEPROM::instance().withCheckPeriod(24h);
 
     // By default, LED on OFF when motion is triggered
     pinMode(MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN, OUTPUT);
@@ -112,7 +111,11 @@ void setup() {
     // We always enter test mode upon startup and we want to expire
     // that particular test session
     turnOnTestMode("");
+
+    sendUnOccupiedToCloud();
 }
+
+
 
 
 void loop() {
@@ -125,7 +128,7 @@ void loop() {
     digitalWrite(MOTION_LISTENING_LED_OUTPUT_PIN, HIGH);
 
     // Check to see if we know ou device name yet...
-    DeviceNameHelperRetained::instance().loop();
+    DeviceNameHelperEEPROM::instance().loop();
 
     // We need an accurate clock for when we go to sleep
     // NJD Disabling thing temporarily as I try to track down what's 
@@ -233,11 +236,11 @@ void syncWallClock() {
 }
 
 bool deviceNameFound() {
-    return DeviceNameHelperRetained::instance().hasName();
+    return DeviceNameHelperEEPROM::instance().hasName();
 }
 
 char const* getDeviceName() {
-    return DeviceNameHelperRetained::instance().getName();
+    return DeviceNameHelperEEPROM::instance().getName();
 }
 
 void expireStartupTestModeIfNecessary() {
