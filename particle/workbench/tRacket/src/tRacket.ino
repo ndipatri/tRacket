@@ -184,11 +184,16 @@ void loop() {
 bool checkForMotion() {
     long pollIntervalStartTimeMillis = millis();
 
+    int motionTriggerCount = 0;
+    int numberOfPollIntervals = 0;
+
     // check for a bit of time
     while((millis() - pollIntervalStartTimeMillis) < (MOTION_POLL_DURATION_MINUTES*60000)) {
 
+        numberOfPollIntervals++;
+
         if (digitalRead(MOTION_SENSOR_DETECTED_INPUT_PIN) == LOW) {
-            return true;
+            motionTriggerCount++;
         }
 
         // when triggered, motion sensor only indicates for 3 seconds...
@@ -196,7 +201,9 @@ bool checkForMotion() {
         delay(1000);
     }
 
-    return false;
+    float motionDetectedAverage = numberOfPollIntervals/motionTriggerCount
+
+    return ;
 }
 
 bool handleIncorrectDevice() {
