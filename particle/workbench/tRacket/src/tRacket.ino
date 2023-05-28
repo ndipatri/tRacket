@@ -14,7 +14,7 @@ Adafruit_INA219 powerMeter;
 // If you check in this code WITH this KEY defined, it will be detected by IO.Adafruit
 // and the WILL DISABLE THIS KEY!!!  So please delete value below before checking in!
 // ***************** !!!!!!!!!!!!!! **********
-#define AIO_KEY         "aio_XmSy92vYjddoZhQ4f19ztFc8Qm6r" // Adafruit IO AIO Key
+#define AIO_KEY         "aio_xzvl16EsQk2G3PTWfzZ1tsXkqQP4" // Adafruit IO AIO Key
 #define AIO_SERVER      "io.adafruit.com"
 #define AIO_SERVERPORT  1883                   // use 8883 for SSL
 String AIO_USERNAME     = "ndipatri";
@@ -63,6 +63,9 @@ long MOTION_PERIOD_INTERVAL_MINUTES = 6;
 long lastMotionTimeMillis = -1L;
 
 long MOTION_POLL_DURATION_MINUTES = 3;
+
+// the ratio of motion hits to missed during a motion check interval
+float MOTION_RATIO_THRESHOLD = .10;
 
 bool firstPass = true;
 
@@ -136,7 +139,9 @@ void loop() {
     //syncWallClock();
 
     if (!deviceNameFound()) {
-        sleepForSeconds(5);
+        sleepForSeconds(120);
+
+        publishParticleLog("error", "cantFindDeviceNameSleeping...");
 
         return;
     }
@@ -193,6 +198,8 @@ bool checkForMotion() {
         numberOfPollIntervals++;
 
         if (digitalRead(MOTION_SENSOR_DETECTED_INPUT_PIN) == LOW) {
+            publishParticleLog("activityReport", "MOTION DETECTED");
+
             motionTriggerCount++;
         }
 
@@ -201,9 +208,11 @@ bool checkForMotion() {
         delay(1000);
     }
 
-    float motionDetectedAverage = numberOfPollIntervals/motionTriggerCount
+    float motionDetectedAverage = (float)motionTriggerCount/numberOfPollIntervals;
 
-    return ;
+    publishParticleLog("motionCheckDone", "motionAvg:" + String(motionDetectedAverage));
+
+    return motionDetectedAverage > MOTION_RATIO_THRESHOLD;
 }
 
 bool handleIncorrectDevice() {
