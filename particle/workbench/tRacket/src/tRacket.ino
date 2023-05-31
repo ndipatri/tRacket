@@ -58,14 +58,14 @@ double batteryVoltageLevel = 0.0;
 //
 // This also has the effect of maintaining the 'occupied' state for the entire
 // duration a court is in use... it's a sort of low-pass filter
-long MOTION_PERIOD_INTERVAL_MINUTES = 6;
+long MOTION_PERIOD_INTERVAL_MINUTES = 4;
 
 long lastMotionTimeMillis = -1L;
 
-long MOTION_POLL_DURATION_MINUTES = 3;
+long MOTION_POLL_DURATION_MINUTES = 2;
 
 // the ratio of motion hits to missed during a motion check interval
-float MOTION_RATIO_THRESHOLD = .10;
+float MOTION_RATIO_THRESHOLD = .08;
 
 bool firstPass = true;
 
