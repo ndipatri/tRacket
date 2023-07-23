@@ -20,3 +20,17 @@ The tRacket [Particle](https://www.particle.io/devices/) microcontroller-based c
 With a pattern of: |dateTime|tRacketID|:|Occupancy, 1-Occuped, 0-Available|
 
 The tRacket device has a custom 12-volt NiHM battery pack that is charged by a solar panel (as shown in picture above).
+
+### Adafruit.io MQTT Broker
+
+[Adafruit.io](https://io.adafruit.com/) has a $10/month subscription service for devices that need to push data up to the cloud for asynchronous access.  Given the tRacket device is powered by solar and its only network connection is a very cheap LTE radio, we don't want end-consumers to connect directly to our tRacket device.  The Adafruit MQTT Broker is a perfect intermediary.
+
+The tRacket device pushes data up to the 'feeds' and 'occupancy' 
+
+
+
+
+
+
+
+
