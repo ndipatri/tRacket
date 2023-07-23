@@ -1,6 +1,6 @@
 # tRacket Particle
 
-[tRacketDevice](media/tRacketDevice.jpg)
+![tRacketDevice](media/tRacketDevice.jpg)
 
 This is the Particle Workbench project that contains the code for the courtside tRacket device itself. 
 
