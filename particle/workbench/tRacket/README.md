@@ -1,6 +1,6 @@
-# tennisEye
+# tRacket Particle
 
-A Particle project named tennisEye
+This is the Particle Workbench project that contains the code for the courtside tRacket device itself.
 
 ## Welcome to your project!
 
