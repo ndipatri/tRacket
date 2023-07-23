@@ -3,6 +3,7 @@
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_SPARK.h"
 #include "DeviceNameHelperRK.h"
+#include "Secrets.h"
 
 // The current meter we will use to determine when battery needs to be
 // recharged.
@@ -11,27 +12,18 @@ Adafruit_INA219 powerMeter;
 // This can be retrieved from https://io.adafruit.com/ndipatri/profile
 // (or if you aren't ndipatri, you can create an account for free)
 
-// If you check in this code WITH this KEY defined, it will be detected by IO.Adafruit
-// and the WILL DISABLE THIS KEY!!!  So please delete value below before checking in!
-// ***************** !!!!!!!!!!!!!! **********
-#define AIO_KEY         "aio_xzvl16EsQk2G3PTWfzZ1tsXkqQP4" // Adafruit IO AIO Key
-#define AIO_SERVER      "io.adafruit.com"
-#define AIO_SERVERPORT  1883                   // use 8883 for SSL
-String AIO_USERNAME     = "ndipatri";
-// ***************** !!!!!!!!!!!!!! **********
-
 TCPClient client; // TCP Client used by Adafruit IO library
 
 Adafruit_MQTT_SPARK mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
 
-String mqttOccupancyTopicName = AIO_USERNAME + "/feeds/occupancy"; 
+String mqttOccupancyTopicName = String(AIO_USERNAME) + "/feeds/occupancy"; 
 Adafruit_MQTT_Publish occupancyMQTTTopic = Adafruit_MQTT_Publish(&mqtt,  mqttOccupancyTopicName);
 
-String mqttRechargeTopicName = AIO_USERNAME + "/feeds/recharge"; 
+String mqttRechargeTopicName = String(AIO_USERNAME) + "/feeds/recharge"; 
 Adafruit_MQTT_Publish rechargeMQTTTopic = Adafruit_MQTT_Publish(&mqtt,  mqttRechargeTopicName);
 
-Adafruit_MQTT_Subscribe errors = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME + "/errors");
-Adafruit_MQTT_Subscribe throttle = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME + "/throttle");
+Adafruit_MQTT_Subscribe errors = Adafruit_MQTT_Subscribe(&mqtt, String(AIO_USERNAME) + "/errors");
+Adafruit_MQTT_Subscribe throttle = Adafruit_MQTT_Subscribe(&mqtt, String(AIO_USERNAME) + "/throttle");
 
 // The sensor is configured NC (normally closed)
 int MOTION_SENSOR_DETECTED_INPUT_PIN = D8; 
