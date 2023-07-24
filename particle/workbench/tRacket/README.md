@@ -34,7 +34,13 @@ The 'occupancy' feed contains the occupancy data described previously.  The 'rec
 
 This monitors the Adafruit.io 'occupancy' feed and delivers a message to the [tRacketSensor Twitter Handle](https://twitter.com/tRacketSensor).  Here is an example message:
 
-<img src="media/tRacketTweetExample" alt="tRacket Tweet Example" width="400"/>
+<img src="media/tRacketTweetExample.png" alt="tRacket Tweet Example" width="400"/>
+
+From the above Tweet history, we can see that the court was occupied but then became available on July 23, 2023 at 06:38PM.  It remained available for 41 minutes until it became occupied again at 07:19PM.
+
+The IFTTT has been configured with two Applets.  The first detects that a change in the Adafruit.io 'occupancy' feed and then passes that data in a webhook back to Adafruit.io.  The second Applet responds to this webhook call by formulating the above message and 
+
+TODO : include all IFTT configuration info here!
 
 
 
