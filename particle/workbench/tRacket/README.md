@@ -8,7 +8,7 @@ This is the Particle Workbench project that contains the code for the courtside 
 
 ## Architecture
 
-There are three main components to the tRacket system: the tRacket courtside device, an MQTT Broker provided by [Adafruit.io](https://io.adafruit.com/), and an [If This Than That (IFTTT)](https://ifttt.com/) Applet.
+There are three main components to the tRacket system: the tRacket courtside device, an MQTT Broker provided by [Adafruit.io](https://io.adafruit.com/), and an Applet on the [If This Than That (IFTTT)](https://ifttt.com/) Integration Server.
 
 
 ### tRacket courtside device
@@ -25,9 +25,16 @@ The tRacket device has a custom 12-volt NiHM battery pack that is charged by a s
 
 [Adafruit.io](https://io.adafruit.com/) has a $10/month subscription service for devices that need to push data up to the cloud for asynchronous access.  Given the tRacket device is powered by solar and its only network connection is a very cheap LTE radio, we don't want end-consumers to connect directly to our tRacket device.  The Adafruit MQTT Broker is a perfect intermediary.
 
-The tRacket device pushes data up to the 'feeds' and 'occupancy' 
+The tRacket device pushes data up to the 'occupancy' and 'recharge' MQTT topics.  When you push up to Adafruit.io, the topics or 'feeds' are created dynamically. So there is very little you need to configure on Adafruit.io for this to all work.
+
+The 'occupancy' feed contains the occupancy data described previously.  The 'recharge' feed contains a message if the tRacket device gets low on power.  This would be useful for identifying if the solar panels are no longer charging the batteries affectively. My single tRacket device has been running on solar power with no problems for over two years as of July 2023.
 
 
+### If This Than That (IFTTT) Integration Server
+
+This monitors the Adafruit.io 'occupancy' feed and delivers a message to the [tRacketSensor Twitter Handle](https://twitter.com/tRacketSensor).  Here is an example message:
+
+<img src="media/tRacketTweetExample" alt="tRacket Tweet Example" width="400"/>
 
 
 
