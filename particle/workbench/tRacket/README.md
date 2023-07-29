@@ -10,6 +10,8 @@ This is the Particle Workbench project that contains the code for the courtside 
 
 There are three main components to the tRacket system: the tRacket courtside device, an MQTT Broker provided by [Adafruit.io](https://io.adafruit.com/), and an Applet on the [If This Than That (IFTTT)](https://ifttt.com/) Integration Server.
 
+The result is whenever the tRacket device detects the beginning or ending of court occupation, a Tweet is sent.
+
 
 ### tRacket courtside device
 
