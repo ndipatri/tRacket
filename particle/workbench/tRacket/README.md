@@ -44,7 +44,23 @@ From the above Tweet history, we can see that the court was occupied but then be
 
 My IFTTT account has been configured with two Applets.  The first detects a change in the Adafruit.io 'occupancy' feed and then passes that data in a webhook back to the second Applet which responds by formulating the above message and posting a Tweet.
 
-Configuring these two Applets involves the following details:
+Configuring these two Applets it's rather tedious and involves the following details:
+
+1. Two Applets are needed.
+
+<img src="media/applet_intro.png" alt="both applets" width="400"/>
+
+2. First Applet: 'Receives Occupancy Feed update and POSTs to "tRacketTweet" WebHook'
+
+<img src="media/applet_1.png" alt="both applets" width="400"/>
+
+<img src="media/applet_2.png" alt="both applets" width="400"/>
+
+<img src="media/applet_3.png" alt="both applets" width="400"/>
+
+<img src="media/applet_4.png" alt="both applets" width="400"/>
+
+<img src="media/applet_5.png" alt="both applets" width="400"/>
 
 
 
