@@ -100,10 +100,27 @@ Configuring these two Applets it's rather tedious and involves the following det
 #### 12V Solar Panel with Charging Circuit ####
 I also used a [Solar Panel kit](https://www.amazon.com/gp/product/B08GX19KT9/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1).  The charging terminals from the solar panel attach directly across the 12v NiMH battery pack. (+ to +, - to -)
 
-#### Rechargeable Battery Pack ####
-The battery pack is custom built from [10 1.2V 2800mAH NiHM batteries](https://www.amazon.com/gp/product/B07PJZKB8X/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1).  They are soldered in series. 8 are in one pack and 2 are in another.  This arrangement was made to be able to fit the batteries most efficiently in the 3D enclosure. The 2-pack fit under the circuit board.
+<img src="media/solar_panel.jpg" alt="solar panel" width="400"/>
 
-<img src="media/battery_pack.jpg" alt="both applets" width="400"/>
+
+#### Rechargeable Battery Pack ####
+
+The battery pack is custom built from [10 1.2V 2800mAH NiHM batteries](https://www.amazon.com/gp/product/B07PJZKB8X/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1).  They are soldered in series. 8 are in one pack and 2 are in another.  This arrangement was made to be able to fit the batteries most efficiently in the 3D enclosure. The 2-pack fit under the circuit board. Lots of electrical tape is used to prevent shorts anywhere.
+
+<img src="media/battery_pack.jpg" alt="battery pack" width="400"/>
+
+#### DC-DC Buck Converter ####
+
+The [DC-DC Buck Converter](https://www.amazon.com/Adjustable-Converter-1-5-35v-Efficiency-Regulator/dp/B07C2QF1T1/ref=sr_1_1_sspa?dchild=1&keywords=buck+converter&qid=1609001107&sr=8-1-spons&psc=1&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUEzMDVDREpLWDZDM1FUJmVuY3J5cHRlZElkPUEwMzc4NDk1MUpOTlRHQVVaTUNPViZlbmNyeXB0ZWRBZElkPUEwNzUxMTYwMUpFTVFNUDRTQ04wWSZ3aWRnZXROYW1lPXNwX2F0ZiZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU=) is what converts our 12V battery to 3.7V for the micro-controller.  It has a micro-potentiometer that is used to manually adjust down the Vout.
+
+<img src="media/buck_converter.png" alt="buck converter" width="400"/>
+
+
+#### Particle Boron MicroController ####
+
+The [Boron](https://www.amazon.com/PARTICLE-Development-Endpoints-Circuitry-Bluetooth/dp/B07N96P69L/ref=sr_1_1?dchild=1&keywords=particle+boron&qid=1609000793&sr=8-1) is a Arduiono-based Microcontroller with LTE cellular network connectivity.
+
+<img src="media/boron.png" alt="Boron Microcontroller" width="400"/>
 
 
 ### Assembly Instructions ###
