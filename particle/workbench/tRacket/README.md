@@ -4,8 +4,7 @@
 
 This is the Particle Workbench project that contains the code for the courtside tRacket device itself. 
 
-I recommend viewing this README with 'Outline' view turned on:
-<img src="media/outline.png" alt="Turn on Outline View" width="400"/>
+I recommend viewing this README with 'Outline' view turned on: <img src="media/outline.png" alt="Turn on Outline View" width="200"/>
 
 
 
