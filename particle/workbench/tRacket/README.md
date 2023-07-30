@@ -171,10 +171,15 @@ The tRacket device is built using 3D-printed parts. The tRacket device is mounte
 
 
 [Main Body](3d_prints/tRacket_mainBody.stl)
+
 [Body Mount Left](3d_prints/tRacket_bodyMount1.stl)
+
 [Body Mount Right](3d_prints/tRacket_bodyMount2.stl)
+
 [Bottom Cap](3d_prints/tRacket_bottomCap.stl)
+
 [Top Cap](3d_prints/tRacket_topCap.stl)
+
 [Internal Tray](3d_prints/tRacket_tray.stl)
 
 
