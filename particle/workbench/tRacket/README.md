@@ -46,21 +46,33 @@ My IFTTT account has been configured with two Applets.  The first detects a chan
 
 Configuring these two Applets it's rather tedious and involves the following details:
 
-1. Two Applets are needed.
+#### Two Applets are needed. ####
 
 <img src="media/applet_intro.png" alt="both applets" width="400"/>
 
-2. First Applet: 'Receives Occupancy Feed update and POSTs to "tRacketTweet" WebHook'
+#### First Applet ####
 
-<img src="media/applet_1.png" alt="both applets" width="400"/>
+'Receives Occupancy Feed update and POSTs to "tRacketTweet" WebHook'
 
-<img src="media/applet_2.png" alt="both applets" width="400"/>
+##### First Applet requires three steps: #####
 
-<img src="media/applet_3.png" alt="both applets" width="400"/>
+<img src="media/applet1_1.png" alt="both applets" width="400"/>
 
-<img src="media/applet_4.png" alt="both applets" width="400"/>
+###### First Applet: If: 'Any new data' #####
 
-<img src="media/applet_5.png" alt="both applets" width="400"/>
+<img src="media/applet1_2.png" alt="both applets" width="400"/>
+
+###### First Applet: With: 'History of data' ######
+
+<img src="media/applet1_3.png" alt="both applets" width="400"/>
+
+###### First Applet: When: 'Filter code' ######
+
+<img src="media/applet1_4.png" alt="both applets" width="400"/>
+
+###### First Applet: Then: 'Make a web request' ######
+
+<img src="media/applet1_5.png" alt="both applets" width="400"/>
 
 
 
