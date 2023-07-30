@@ -52,15 +52,15 @@ Configuring these two Applets it's rather tedious and involves the following det
 
 2. First Applet: 'Receives Occupancy Feed update and POSTs to "tRacketTweet" WebHook'
 
-<img src="media/applet_1.png" alt="both applets" width="400"/>
+<img src="media/applet1_1.png" alt="both applets" width="400"/>
 
-<img src="media/applet_2.png" alt="both applets" width="400"/>
+<img src="media/applet1_2.png" alt="both applets" width="400"/>
 
-<img src="media/applet_3.png" alt="both applets" width="400"/>
+<img src="media/applet1_3.png" alt="both applets" width="400"/>
 
-<img src="media/applet_4.png" alt="both applets" width="400"/>
+<img src="media/applet1_4.png" alt="both applets" width="400"/>
 
-<img src="media/applet_5.png" alt="both applets" width="400"/>
+<img src="media/applet1_5.png" alt="both applets" width="400"/>
 
 
 
