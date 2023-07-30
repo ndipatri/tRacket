@@ -46,6 +46,11 @@ My IFTTT account has been configured with two Applets.  The first detects a chan
 
 Configuring these two Applets involves the following details:
 
+1. Two Applets are needed.
+
+<img src="media/applet1.png" alt="both applets" width="400"/>
+
+
 
 
 
