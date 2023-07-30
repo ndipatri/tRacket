@@ -99,8 +99,12 @@ Configuring these two Applets it's rather tedious and involves the following det
 
 #### 12V Solar Panel with Charging Circuit ####
 
-#### 
 
+### Assembly Instructions ###
+
+#### Schematic ####
+
+<img src="media/schematic.jpg" alt="both applets" width="300"/>
 
 
 
