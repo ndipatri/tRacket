@@ -2,6 +2,8 @@
 
 <img src="media/tRacketDeviceInstalled.jpg" alt="tRacket Device Installed" width="400"/>
 
+<img src="media/tRacketTweetExample.png" alt="tRacket Tweet Example" width="400"/>
+
 This is the Particle Workbench project that contains the code for the courtside tRacket device itself. 
 
 I recommend viewing this README with 'Outline' view turned on: <img src="media/outline.png" alt="Turn on Outline View" width="200"/>
@@ -170,12 +172,17 @@ The tRacket device is built using 3D-printed parts. The tRacket device is mounte
 
 
 
-[Main Body](/3d_prints/tRacket_mainBody.stl)
-[Body Mount Left](/3d_prints/tRacket_bodyMount1.stl)
-[Body Mount Right](/3d_prints/tRacket_bodyMount2.stl)
-[Bottom Cap](/3d_prints/tRacket_bottomCap.stl)
-[Top Cap](/3d_prints/tRacket_topCap.stl)
-[Internal Tray](/3d_prints/tRacket_tray.stl)
+[Main Body](3d_prints/tRacket_mainBody.stl)
+
+[Body Mount Left](3d_prints/tRacket_bodyMount1.stl)
+
+[Body Mount Right](3d_prints/tRacket_bodyMount2.stl)
+
+[Bottom Cap](3d_prints/tRacket_bottomCap.stl)
+
+[Top Cap](3d_prints/tRacket_topCap.stl)
+
+[Internal Tray](3d_prints/tRacket_tray.stl)
 
 
 
