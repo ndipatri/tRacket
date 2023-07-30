@@ -1,5 +1,8 @@
 # tRacket Particle
 
+
+<img src="media/tennis_court.jpg" alt="tRacket Tennis Court" width="400"/>
+
 <img src="media/tRacketDeviceInstalled.jpg" alt="tRacket Device Installed" width="400"/>
 
 <img src="media/tRacketTweetExample.png" alt="tRacket Tweet Example" width="400"/>
