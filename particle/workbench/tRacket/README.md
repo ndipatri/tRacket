@@ -1,4 +1,7 @@
-# tRacket Particle
+# tRacket - Tennis Court Occupancy Tracker
+
+
+<img src="media/tennis_court.png" alt="tRacket Tennis Court" width="400"/>
 
 <img src="media/tRacketDeviceInstalled.jpg" alt="tRacket Device Installed" width="400"/>
 
@@ -124,11 +127,30 @@ The [Boron](https://www.amazon.com/PARTICLE-Development-Endpoints-Circuitry-Blue
 
 <img src="media/boron.png" alt="Boron Microcontroller" width="400"/>
 
+The [tRacket.ino](src/tRacket.ino) file can be used to program Particle Boron.  You will need to create your own [Secrets.h](src/Secrets.h) file which contains the following content:
+
+```
+#ifndef SECRETS_H
+#define SECRETS_H
+
+// If you check in this code WITH this KEY defined, it will be detected by IO.Adafruit
+// and IT WILL BE DISABLED !!!  So please make sure this file is 'ignored' by your
+// source code management!
+#define AIO_USERNAME "xxxxxx"
+#define AIO_KEY "aio_xxxxx"
+#define AIO_SERVER      "io.adafruit.com"
+#define AIO_SERVERPORT  1883          // use 8883 for SSL
+
+#endif
+```
+
 #### Motion Sensor (Brojen BJ-912)  ####
 
 The [Brojen BJ-912](https://www.amazon.com/BROJEN-Brojen-BJ-912-Curtain/dp/B07C53ZS2Y/ref=sr_1_1?dchild=1&keywords=Brojen+BJ-912&qid=1609000375&sr=8-1) motion sensor is placed directly inside the 3D enclosure.  This sensor requires 12V which is why we have a 12V supply.  
 
 Changes need to be made on the inside of the motion sensor. The 'Normally Open (NO)' jumper needs to be removed and the 'LED ON' (i.e. 'Enable LED') jumper wires need to be brought outside of the sensor as shown.  The 'Enable LED' signal is set by the microcontroller as the LED is enabled with tRacket is in 'test' mode.
+
+The motion sensor should be sealed into the main 3D enclosure with exterior silicon-based caulk.  It's important to make this a waterproof seal.
 
 <img src="media/motion_sensor_jumpers.jpg" alt="Motion Sensor Jumpers" width="400"/>
 
@@ -188,6 +210,19 @@ The tRacket device is built using 3D-printed parts. The tRacket device is mounte
 
 ### Assembly Instructions ###
 
+All seals should be secured with exterior grade silicon-based caulk.  The following pictures are meant to provide guidance on how to assemble tRacket parts.
+
+<img src="media/assembly1.jpg" alt="Assembly 1" width="400"/>
+
+<img src="media/assembly2.jpg" alt="Assembly 2" width="400"/>
+
+<img src="media/assembly3.jpg" alt="Assembly 3" width="400"/>
+
+<img src="media/assembly4.jpg" alt="Assembly 4" width="400"/>
+
+<img src="media/assembly5.jpg" alt="Assembly 5" width="400"/>
+
+<img src="media/assembly6.jpg" alt="Assembly 6" width="400"/>
 
 
 
