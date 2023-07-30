@@ -152,6 +152,7 @@ This comes in the Featherwing form-factor so it fits on the above Featherwing Do
 
 We currently report one of two states: ‘RECHARGE’ or ‘GOOD’.  We employ a Schmitt Trigger to determine which state we are in.  This requires two voltage thresholds:  a low (12.2 VDC) and a high (12.6 VDC). This avoids ‘oscillating’ that might happen if the voltage were to hover around a single threshold (e.g. RECHARGE, GOOD, RECHARGE, GOOD, etc.) 
 
+<img src="media/schmitt.png" alt="Schmitt Trigger" width="400"/>
 
 
 
