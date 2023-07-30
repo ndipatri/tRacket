@@ -113,14 +113,14 @@ The battery pack is custom built from [10 1.2V 2800mAH NiHM batteries](https://w
 
 The [DC-DC Buck Converter](https://www.amazon.com/Adjustable-Converter-1-5-35v-Efficiency-Regulator/dp/B07C2QF1T1/ref=sr_1_1_sspa?dchild=1&keywords=buck+converter&qid=1609001107&sr=8-1-spons&psc=1&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUEzMDVDREpLWDZDM1FUJmVuY3J5cHRlZElkPUEwMzc4NDk1MUpOTlRHQVVaTUNPViZlbmNyeXB0ZWRBZElkPUEwNzUxMTYwMUpFTVFNUDRTQ04wWSZ3aWRnZXROYW1lPXNwX2F0ZiZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU=) is what converts our 12V battery to 3.7V for the micro-controller.  It has a micro-potentiometer that is used to manually adjust down the Vout.
 
-<img src="media/buck_converter.jpg" alt="buck converter" width="400"/>
+<img src="media/buck_converter.png" alt="buck converter" width="400"/>
 
 
 #### Particle Boron MicroController ####
 
 The [Boron](https://www.amazon.com/PARTICLE-Development-Endpoints-Circuitry-Bluetooth/dp/B07N96P69L/ref=sr_1_1?dchild=1&keywords=particle+boron&qid=1609000793&sr=8-1) is a Arduiono-based Microcontroller with LTE cellular network connectivity.
 
-<img src="media/boron.jpg" alt="Boron Microcontroller" width="400"/>
+<img src="media/boron.png" alt="Boron Microcontroller" width="400"/>
 
 
 ### Assembly Instructions ###
