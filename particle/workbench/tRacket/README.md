@@ -155,14 +155,26 @@ We currently report one of two states: ‘RECHARGE’ or ‘GOOD’.  We employ 
 <img src="media/schmitt.png" alt="Schmitt Trigger" width="400"/>
 
 
+#### Schematic ####
+
+<img src="media/schematic.jpg" alt="both applets" width="400"/>
+
+
+### 3D Prints ###
+
+The tRacket device is built using 3D-printed parts. The tRacket device is mounted to a pole with a 3D-printed bracket.  The pole is mounted to a typical tennis court using stainless-steel band clamps.
+
+<img src="media/tracket_device.jpg" alt="tRacket Device" width="400"/>
+
+<img src="media/pole_mount" alt="pole mount" width="400"/>
+
+
 
 
 
 ### Assembly Instructions ###
 
-#### Schematic ####
 
-<img src="media/schematic.jpg" alt="both applets" width="400"/>
 
 
 
