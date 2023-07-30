@@ -127,6 +127,23 @@ The [Boron](https://www.amazon.com/PARTICLE-Development-Endpoints-Circuitry-Blue
 
 <img src="media/boron.png" alt="Boron Microcontroller" width="400"/>
 
+The [tRacket.ino](src/tRacket.ino) file can be used to program Particle Boron.  You will need to create your own [Secrets.h](src/Secrets.h) file which contains the following content:
+
+`
+#ifndef SECRETS_H
+#define SECRETS_H
+
+// If you check in this code WITH this KEY defined, it will be detected by IO.Adafruit
+// and IT WILL BE DISABLED !!!  So please make sure this file is 'ignored' by your
+// source code management!
+#define AIO_USERNAME "xxxxxx"
+#define AIO_KEY "aio_xxxxx"
+#define AIO_SERVER      "io.adafruit.com"
+#define AIO_SERVERPORT  1883          // use 8883 for SSL
+
+#endif
+`
+
 #### Motion Sensor (Brojen BJ-912)  ####
 
 The [Brojen BJ-912](https://www.amazon.com/BROJEN-Brojen-BJ-912-Curtain/dp/B07C53ZS2Y/ref=sr_1_1?dchild=1&keywords=Brojen+BJ-912&qid=1609000375&sr=8-1) motion sensor is placed directly inside the 3D enclosure.  This sensor requires 12V which is why we have a 12V supply.  
