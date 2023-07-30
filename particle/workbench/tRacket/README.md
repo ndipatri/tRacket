@@ -150,6 +150,8 @@ The [Brojen BJ-912](https://www.amazon.com/BROJEN-Brojen-BJ-912-Curtain/dp/B07C5
 
 Changes need to be made on the inside of the motion sensor. The 'Normally Open (NO)' jumper needs to be removed and the 'LED ON' (i.e. 'Enable LED') jumper wires need to be brought outside of the sensor as shown.  The 'Enable LED' signal is set by the microcontroller as the LED is enabled with tRacket is in 'test' mode.
 
+The motion sensor should be sealed into the main 3D enclosure with exterior silicon-based caulk.  It's important to make this a waterproof seal.
+
 <img src="media/motion_sensor_jumpers.jpg" alt="Motion Sensor Jumpers" width="400"/>
 
 The 'Enable LED' signal is connected to the external bus on the motion sensor as shown:
@@ -207,6 +209,10 @@ The tRacket device is built using 3D-printed parts. The tRacket device is mounte
 
 
 ### Assembly Instructions ###
+
+All seals should be secured with exterior grade silicon-based caulk.  The following pictures are meant to provide guidance on how to assemble tRacket parts.
+
+
 
 
 
