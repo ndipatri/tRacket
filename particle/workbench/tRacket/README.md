@@ -42,9 +42,9 @@ The If This Than That (IFTTT) Integration Server monitors the Adafruit.io 'occup
 
 From the above Tweet history, we can see that the court was occupied but then became available on July 23, 2023 at 06:38PM.  It remained available for 41 minutes until it became occupied again at 07:19PM.
 
-My IFTTT account has been configured with two Applets.  The first detects a change in the Adafruit.io 'occupancy' feed and then passes that data in a webhook back to Adafruit.io.  The second Applet responds to this webhook call by formulating the above message and 
+My IFTTT account has been configured with two Applets.  The first detects a change in the Adafruit.io 'occupancy' feed and then passes that data in a webhook back to the second Applet which responds by formulating the above message and posting a Tweet.
 
-TODO : include all IFTT configuration info here!
+Configuring these two Applets involves the following details:
 
 
 
