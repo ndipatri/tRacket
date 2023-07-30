@@ -141,6 +141,16 @@ The 'Enable LED' signal is connected to the external bus on the motion sensor as
 
 [Featherwing]((https://www.adafruit.com/product/2890)) is a standard for wiring up microcontrollers and peripherals.  Certain connections are common across all three sockets.  The VBAT pin has a max rating of 3.7V.  
 
+#### Current Meter ####
+
+<img src="media/current_meter.png" alt="Current Meter" width="400"/>
+
+
+We use the [Adafruit INA219 FeatherWing Current Meter](https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout) to warn us when the 12V battery needs to be recharged. 
+
+This comes in the Featherwing form-factor so it fits on the above Featherwing Doubler along with the Particle microcontroller. It also has a small ‘experiment’ area onto which I install transistor for the motion sensor.
+
+We currently report one of two states: ‘RECHARGE’ or ‘GOOD’.  We employ a Schmitt Trigger to determine which state we are in.  This requires two voltage thresholds:  a low (12.2 VDC) and a high (12.6 VDC). This avoids ‘oscillating’ that might happen if the voltage were to hover around a single threshold (e.g. RECHARGE, GOOD, RECHARGE, GOOD, etc.) 
 
 
 
