@@ -166,7 +166,9 @@ The tRacket device is built using 3D-printed parts. The tRacket device is mounte
 
 <img src="media/tracket_device.jpg" alt="tRacket Device" width="400"/>
 
-<img src="media/pole_mount" alt="pole mount" width="400"/>
+<img src="media/pole_mount.jpg" alt="pole mount" width="400"/>
+
+
 
 
 
