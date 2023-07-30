@@ -129,7 +129,7 @@ The [Boron](https://www.amazon.com/PARTICLE-Development-Endpoints-Circuitry-Blue
 
 The [tRacket.ino](src/tRacket.ino) file can be used to program Particle Boron.  You will need to create your own [Secrets.h](src/Secrets.h) file which contains the following content:
 
-`
+```
 #ifndef SECRETS_H
 #define SECRETS_H
 
@@ -142,7 +142,7 @@ The [tRacket.ino](src/tRacket.ino) file can be used to program Particle Boron.  
 #define AIO_SERVERPORT  1883          // use 8883 for SSL
 
 #endif
-`
+```
 
 #### Motion Sensor (Brojen BJ-912)  ####
 
