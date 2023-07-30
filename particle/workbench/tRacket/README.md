@@ -95,6 +95,11 @@ Configuring these two Applets it's rather tedious and involves the following det
 
 
 
+### Parts List ###
+
+#### 12V Solar Panel with Charging Circuit ####
+
+#### 
 
 
 
