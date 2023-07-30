@@ -14,6 +14,7 @@ Adafruit_INA219 powerMeter;
 
 TCPClient client; // TCP Client used by Adafruit IO library
 
+
 Adafruit_MQTT_SPARK mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
 
 String mqttOccupancyTopicName = String(AIO_USERNAME) + "/feeds/occupancy"; 
