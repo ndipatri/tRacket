@@ -46,13 +46,13 @@ My IFTTT account has been configured with two Applets.  The first detects a chan
 
 Configuring these two Applets it's rather tedious and involves the following details:
 
-1. Two Applets are needed.
+#### Two Applets are needed. ####
 
 <img src="media/applet_intro.png" alt="both applets" width="400"/>
 
-2. First Applet: 'Receives Occupancy Feed update and POSTs to "tRacketTweet" WebHook'
+#### First Applet: 'Receives Occupancy Feed update and POSTs to "tRacketTweet" WebHook' ####
 
-First Applet requires three steps:
+##### First Applet requires three steps: #####
 
 <img src="media/applet1_1.png" alt="both applets" width="400"/>
 
