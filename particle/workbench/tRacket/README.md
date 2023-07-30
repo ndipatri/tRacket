@@ -122,6 +122,17 @@ The [Boron](https://www.amazon.com/PARTICLE-Development-Endpoints-Circuitry-Blue
 
 <img src="media/boron.png" alt="Boron Microcontroller" width="400"/>
 
+#### Motion Sensor (Brojen BJ-912)  ####
+
+The [Brojen BJ-912](https://www.amazon.com/BROJEN-Brojen-BJ-912-Curtain/dp/B07C53ZS2Y/ref=sr_1_1?dchild=1&keywords=Brojen+BJ-912&qid=1609000375&sr=8-1) motion sensor is placed directly inside the 3D enclosure.  This sensor requires 12V which is why we have a 12V supply.  
+
+Changes need to be made on the inside of the motion sensor. The 'Normally Open (NO)' jumper needs to be removed and the 'LED ON' (i.e. 'Enable LED') jumper wires need to be brought outside of the sensor as shown.  The 'Enable LED' signal is set by the microcontroller as the LED is enabled with tRacket is in 'test' mode.
+
+<img src="media/motion_sensor_jumpers.jpg" alt="Motion Sensor Jumpers" width="400"/>
+
+
+
+
 
 ### Assembly Instructions ###
 
