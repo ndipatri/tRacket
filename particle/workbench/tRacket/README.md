@@ -135,6 +135,16 @@ The 'Enable LED' signal is connected to the external bus on the motion sensor as
 <img src="media/motion_sensor_bus.jpg" alt="Motion Sensor Bus" width="400"/>
 
 
+#### Featherwing Doubler ####
+
+<img src="media/featherwing_doubler.png" alt="Featherwing Doubler" width="400"/>
+
+[Featherwing]((https://www.adafruit.com/product/2890)) is a standard for wiring up microcontrollers and peripherals.  Certain connections are common across all three sockets.  The VBAT pin has a max rating of 3.7V.  
+
+
+
+
+
 
 
 ### Assembly Instructions ###
