@@ -1,4 +1,4 @@
-# tRacket Particle
+# tRacket - Tennis Court Occupancy Tracker
 
 
 <img src="media/tennis_court.png" alt="tRacket Tennis Court" width="400"/>
