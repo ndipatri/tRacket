@@ -130,6 +130,9 @@ Changes need to be made on the inside of the motion sensor. The 'Normally Open (
 
 <img src="media/motion_sensor_jumpers.jpg" alt="Motion Sensor Jumpers" width="400"/>
 
+The 'Enable LED' signal is connected to the external bus on the motion sensor as shown:
+
+<img src="media/motion_sensor_bus.jpg" alt="Motion Sensor Bus" width="400"/>
 
 
 
