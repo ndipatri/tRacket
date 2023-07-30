@@ -60,19 +60,19 @@ Configuring these two Applets it's rather tedious and involves the following det
 
 ###### First Applet: If: 'Any new data' #####
 
-<img src="media/applet1_2.png" alt="both applets" width="400"/>
+<img src="media/applet1_2.png" alt="both applets" width="300"/>
 
 ###### First Applet: With: 'History of data' ######
 
-<img src="media/applet1_3.png" alt="both applets" width="400"/>
+<img src="media/applet1_3.png" alt="both applets" width="300"/>
 
 ###### First Applet: When: 'Filter code' ######
 
-<img src="media/applet1_4.png" alt="both applets" width="400"/>
+<img src="media/applet1_4.png" alt="both applets" width="300"/>
 
 ###### First Applet: Then: 'Make a web request' ######
 
-<img src="media/applet1_5.png" alt="both applets" width="400"/>
+<img src="media/applet1_5.png" alt="both applets" width="300"/>
 
 
 
