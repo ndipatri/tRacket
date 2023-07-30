@@ -212,8 +212,17 @@ The tRacket device is built using 3D-printed parts. The tRacket device is mounte
 
 All seals should be secured with exterior grade silicon-based caulk.  The following pictures are meant to provide guidance on how to assemble tRacket parts.
 
+<img src="media/assembly1.jpg" alt="Assembly 1" width="400"/>
 
+<img src="media/assembly2.jpg" alt="Assembly 2" width="400"/>
 
+<img src="media/assembly3.jpg" alt="Assembly 3" width="400"/>
+
+<img src="media/assembly4.jpg" alt="Assembly 4" width="400"/>
+
+<img src="media/assembly5.jpg" alt="Assembly 5" width="400"/>
+
+<img src="media/assembly6.jpg" alt="Assembly 6" width="400"/>
 
 
 
