@@ -25,22 +25,24 @@ The tRacket device has a custom 12-volt NiHM battery pack that is charged by a s
 
 ### Adafruit.io MQTT Broker
 
-[Adafruit.io](https://io.adafruit.com/) has a $10/month subscription service for devices that need to push data up to the cloud for asynchronous access.  Given the tRacket device is powered by solar and its only network connection is a very cheap LTE radio, we don't want end-consumers to connect directly to our tRacket device.  The Adafruit MQTT Broker is a perfect intermediary.
+[Adafruit.io](https://io.adafruit.com/) has a $10/month subscription service for devices that need to push data up to the cloud for asynchronous access.  Given the tRacket device is powered by solar and its only network connection is a very cheap LTE radio, we don't want end-consumers to connect directly to the tRacket device.  The Adafruit MQTT Broker is a perfect intermediary.
 
 The tRacket device pushes data up to the 'occupancy' and 'recharge' MQTT topics.  When you push up to Adafruit.io, the topics or 'feeds' are created dynamically. So there is very little you need to configure on Adafruit.io for this to all work.
 
-The 'occupancy' feed contains the occupancy data described previously.  The 'recharge' feed contains a message if the tRacket device gets low on power.  This would be useful for identifying if the solar panels are no longer charging the batteries affectively. My single tRacket device has been running on solar power with no problems for over two years as of July 2023.
+The 'occupancy' feed contains the occupancy data described previously.  The 'recharge' feed contains a message if the tRacket device gets low on power.  This would be useful for identifying if the solar panels are no longer charging the batteries affectively. 
+
+**My single tRacket device has been running on solar power with no problems for over two years as of July 2023.**
 
 
 ### If This Than That (IFTTT) Integration Server
 
-This monitors the Adafruit.io 'occupancy' feed and delivers a message to the [tRacketSensor Twitter Handle](https://twitter.com/tRacketSensor).  Here is an example message:
+The If This Than That (IFTTT) Integration Server monitors the Adafruit.io 'occupancy' feed and delivers a message to the [tRacketSensor Twitter Handle](https://twitter.com/tRacketSensor).  Here is an example message:
 
 <img src="media/tRacketTweetExample.png" alt="tRacket Tweet Example" width="400"/>
 
 From the above Tweet history, we can see that the court was occupied but then became available on July 23, 2023 at 06:38PM.  It remained available for 41 minutes until it became occupied again at 07:19PM.
 
-The IFTTT has been configured with two Applets.  The first detects that a change in the Adafruit.io 'occupancy' feed and then passes that data in a webhook back to Adafruit.io.  The second Applet responds to this webhook call by formulating the above message and 
+My IFTTT account has been configured with two Applets.  The first detects a change in the Adafruit.io 'occupancy' feed and then passes that data in a webhook back to Adafruit.io.  The second Applet responds to this webhook call by formulating the above message and 
 
 TODO : include all IFTT configuration info here!
 
