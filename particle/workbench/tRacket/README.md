@@ -75,6 +75,26 @@ Configuring these two Applets it's rather tedious and involves the following det
 <img src="media/applet1_5.png" alt="both applets" width="300"/>
 
 
+#### Second Applet ####
+
+'Receives "tRacketTweet" WebHook then tweets to @tRacketSensor'
+
+##### Second Applet requires two steps: #####
+
+<img src="media/applet2_1.png" alt="both applets" width="400"/>
+
+###### Second Applet: If: 'Receive a web request' #####
+
+<img src="media/applet2_2.png" alt="both applets" width="300"/>
+
+###### Second Applet: Then: 'Post a Tweet' ######
+
+<img src="media/applet2_3.png" alt="both applets" width="300"/>
+
+
+
+
+
 
 
 
