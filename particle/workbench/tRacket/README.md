@@ -98,13 +98,21 @@ Configuring these two Applets it's rather tedious and involves the following det
 ### Parts List ###
 
 #### 12V Solar Panel with Charging Circuit ####
+I also used a [Solar Panel kit](https://www.amazon.com/gp/product/B08GX19KT9/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1).  The charging terminals from the solar panel attach directly across the 12v NiMH battery pack. (+ to +, - to -)
+
+#### Rechargeable Battery Pack ####
+The battery pack is custom built from [10 1.2V 2800mAH NiHM batteries](https://www.amazon.com/gp/product/B07PJZKB8X/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1).  They are soldered in series. 8 are in one pack and 2 are in another.  This arrangement was made to be able to fit the batteries most efficiently in the 3D enclosure.
+
+<img src="media/battery_pack.jpg" alt="both applets" width="400"/>
 
 
 ### Assembly Instructions ###
 
 #### Schematic ####
 
-<img src="media/schematic.jpg" alt="both applets" width="300"/>
+<img src="media/schematic.jpg" alt="both applets" width="400"/>
+
+
 
 
 
