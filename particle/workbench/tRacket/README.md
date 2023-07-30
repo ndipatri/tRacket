@@ -160,7 +160,7 @@ We currently report one of two states: ‘RECHARGE’ or ‘GOOD’.  We employ 
 <img src="media/schematic.jpg" alt="both applets" width="400"/>
 
 
-### 3D Prints ###
+### 3D STL Files ###
 
 The tRacket device is built using 3D-printed parts. The tRacket device is mounted to a pole with a 3D-printed bracket.  The pole is mounted to a typical tennis court using stainless-steel band clamps.
 
@@ -170,7 +170,12 @@ The tRacket device is built using 3D-printed parts. The tRacket device is mounte
 
 
 
-
+[Main Body](/3d_prints/tRacket_mainBody.stl)
+[Body Mount Left](/3d_prints/tRacket_bodyMount1.stl)
+[Body Mount Right](/3d_prints/tRacket_bodyMount2.stl)
+[Bottom Cap](/3d_prints/tRacket_bottomCap.stl)
+[Top Cap](/3d_prints/tRacket_topCap.stl)
+[Internal Tray](/3d_prints/tRacket_tray.stl)
 
 
 
