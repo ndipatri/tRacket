@@ -90,11 +90,11 @@ Configuring these two Applets is rather tedious and involves the following detai
 
 <img src="media/applet2_1.png" alt="both applets" width="400"/>
 
-###### Second Applet: If: 'Receive a web request' #####
+###### Second Applet. First Step. If: 'Receive a web request' #####
 
 <img src="media/applet2_2.png" alt="both applets" width="300"/>
 
-###### Second Applet: Then: 'Post a Tweet' ######
+###### Second Applet. Second Step. Then: 'Post a Tweet' ######
 
 <img src="media/applet2_3.png" alt="both applets" width="300"/>
 
