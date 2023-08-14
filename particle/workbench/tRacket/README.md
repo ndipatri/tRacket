@@ -61,23 +61,23 @@ Configuring these two Applets is rather tedious and involves the following detai
 
 'Receives Occupancy Feed update and POSTs to "tRacketTweet" WebHook'
 
-##### First Applet requires three steps: #####
+##### First Applet requires four steps: #####
 
 <img src="media/applet1_1.png" alt="both applets" width="400"/>
 
-###### First Applet: If: 'Any new data' #####
+###### First Applet, First Step. If: 'Any new data' #####
 
 <img src="media/applet1_2.png" alt="both applets" width="300"/>
 
-###### First Applet: With: 'History of data' ######
+###### First Applet, Second Step. With: 'History of data' ######
 
 <img src="media/applet1_3.png" alt="both applets" width="300"/>
 
-###### First Applet: When: 'Filter code' ######
+###### First Applet, Third Step. When: 'Filter code' ######
 
 <img src="media/applet1_4.png" alt="both applets" width="300"/>
 
-###### First Applet: Then: 'Make a web request' ######
+###### First Applet, Fourth Step. Then: 'Make a web request' ######
 
 <img src="media/applet1_5.png" alt="both applets" width="300"/>
 
