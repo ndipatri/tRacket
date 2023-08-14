@@ -43,7 +43,7 @@ The 'occupancy' feed contains the occupancy data described previously.  The 'rec
 
 ### If This Than That (IFTTT) Integration Server
 
-The If This Than That (IFTTT) Integration Server monitors the Adafruit.io 'occupancy' feed and delivers a message to the [tRacketSensor Twitter Handle](https://twitter.com/tRacketSensor).  Here is an example message:
+If This Than That (IFTTT) Integration Service ($60/yr for 'Pro' plan) monitors the Adafruit.io 'occupancy' feed and delivers a message to the [tRacketSensor Twitter Handle](https://twitter.com/tRacketSensor).  Here is an example message:
 
 <img src="media/tRacketTweetExample.png" alt="tRacket Tweet Example" width="400"/>
 
