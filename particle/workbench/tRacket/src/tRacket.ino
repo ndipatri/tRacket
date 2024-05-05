@@ -26,7 +26,6 @@ Adafruit_MQTT_Publish rechargeMQTTTopic = Adafruit_MQTT_Publish(&mqtt,  mqttRech
 Adafruit_MQTT_Subscribe errors = Adafruit_MQTT_Subscribe(&mqtt, String(AIO_USERNAME) + "/errors");
 Adafruit_MQTT_Subscribe throttle = Adafruit_MQTT_Subscribe(&mqtt, String(AIO_USERNAME) + "/throttle");
 
-// The sensor is configured NC (normally closed)
 int MOTION_SENSOR_DETECTED_INPUT_PIN = D8; 
 int MOTION_SENSOR_LED_ENABLE_OUTPUT_PIN = D4; 
 
@@ -190,7 +189,9 @@ bool checkForMotion() {
 
         numberOfPollIntervals++;
 
-        if (digitalRead(MOTION_SENSOR_DETECTED_INPUT_PIN) == LOW) {
+        // sensor configured NC (normally closed).. so it goes HIGH
+        // when it's triggered
+        if (digitalRead(MOTION_SENSOR_DETECTED_INPUT_PIN) == HIGH) {
             publishParticleLog("activityReport", "MOTION DETECTED");
 
             motionTriggerCount++;
