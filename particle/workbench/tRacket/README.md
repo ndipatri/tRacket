@@ -43,7 +43,7 @@ The 'occupancy' feed contains the occupancy data described previously.  The 'rec
 
 ### If This Than That (IFTTT) Integration Server
 
-The If This Than That (IFTTT) Integration Server monitors the Adafruit.io 'occupancy' feed and delivers a message to the [tRacketSensor Twitter Handle](https://twitter.com/tRacketSensor).  Here is an example message:
+If This Than That (IFTTT) Integration Service ($60/yr for 'Pro' plan) monitors the Adafruit.io 'occupancy' feed and delivers a message to the [tRacketSensor Twitter Handle](https://twitter.com/tRacketSensor).  Here is an example message:
 
 <img src="media/tRacketTweetExample.png" alt="tRacket Tweet Example" width="400"/>
 
@@ -51,7 +51,7 @@ From the above Tweet history, we can see that the court was occupied but then be
 
 My IFTTT account has been configured with two Applets.  The first detects a change in the Adafruit.io 'occupancy' feed and then passes that data in a webhook back to the second Applet which responds by formulating the above message and posting a Tweet.
 
-Configuring these two Applets it's rather tedious and involves the following details:
+Configuring these two Applets is rather tedious and involves the following details:
 
 #### Two Applets are needed. ####
 
@@ -61,23 +61,23 @@ Configuring these two Applets it's rather tedious and involves the following det
 
 'Receives Occupancy Feed update and POSTs to "tRacketTweet" WebHook'
 
-##### First Applet requires three steps: #####
+##### First Applet requires four steps: #####
 
 <img src="media/applet1_1.png" alt="both applets" width="400"/>
 
-###### First Applet: If: 'Any new data' #####
+###### First Applet, First Step. If: 'Any new data' #####
 
 <img src="media/applet1_2.png" alt="both applets" width="300"/>
 
-###### First Applet: With: 'History of data' ######
+###### First Applet, Second Step. With: 'History of data' ######
 
 <img src="media/applet1_3.png" alt="both applets" width="300"/>
 
-###### First Applet: When: 'Filter code' ######
+###### First Applet, Third Step. When: 'Filter code' ######
 
 <img src="media/applet1_4.png" alt="both applets" width="300"/>
 
-###### First Applet: Then: 'Make a web request' ######
+###### First Applet, Fourth Step. Then: 'Make a web request' ######
 
 <img src="media/applet1_5.png" alt="both applets" width="300"/>
 
@@ -90,11 +90,11 @@ Configuring these two Applets it's rather tedious and involves the following det
 
 <img src="media/applet2_1.png" alt="both applets" width="400"/>
 
-###### Second Applet: If: 'Receive a web request' #####
+###### Second Applet. First Step. If: 'Receive a web request' #####
 
 <img src="media/applet2_2.png" alt="both applets" width="300"/>
 
-###### Second Applet: Then: 'Post a Tweet' ######
+###### Second Applet. Second Step. Then: 'Post a Tweet' ######
 
 <img src="media/applet2_3.png" alt="both applets" width="300"/>
 
@@ -103,7 +103,7 @@ Configuring these two Applets it's rather tedious and involves the following det
 ### Parts List ###
 
 #### 12V Solar Panel with Charging Circuit ####
-I also used a [Solar Panel kit](https://www.amazon.com/gp/product/B08GX19KT9/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1).  The charging terminals from the solar panel attach directly across the 12v NiMH battery pack. (+ to +, - to -)
+I used a [Solar Panel kit](https://www.amazon.com/gp/product/B08GX19KT9/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1).  The charging terminals from the solar panel attach directly across the 12v NiMH battery pack. (+ to +, - to -)
 
 <img src="media/solar_panel.jpg" alt="solar panel" width="400"/>
 
@@ -123,18 +123,18 @@ The [DC-DC Buck Converter](https://www.amazon.com/Adjustable-Converter-1-5-35v-E
 
 #### Particle Boron MicroController ####
 
-The [Boron](https://www.amazon.com/PARTICLE-Development-Endpoints-Circuitry-Bluetooth/dp/B07N96P69L/ref=sr_1_1?dchild=1&keywords=particle+boron&qid=1609000793&sr=8-1) is a Arduiono-based Microcontroller with LTE cellular network connectivity.
+The [Boron](https://www.amazon.com/PARTICLE-Development-Endpoints-Circuitry-Bluetooth/dp/B07N96P69L/ref=sr_1_1?dchild=1&keywords=particle+boron&qid=1609000793&sr=8-1) is a Arduino-based Microcontroller with LTE cellular network connectivity.
 
 <img src="media/boron.png" alt="Boron Microcontroller" width="400"/>
 
-The [tRacket.ino](src/tRacket.ino) file can be used to program Particle Boron.  You will need to create your own [Secrets.h](src/Secrets.h) file which contains the following content:
+The [tRacket.ino](src/tRacket.ino) file can be used to program the Particle Boron.  You will need to create your own [Secrets.h](src/Secrets.h) file which contains the following content:
 
 ```
 #ifndef SECRETS_H
 #define SECRETS_H
 
 // If you check in this code WITH this KEY defined, it will be detected by IO.Adafruit
-// and IT WILL BE DISABLED !!!  So please make sure this file is 'ignored' by your
+// and IT WILL BE DISABLED!!!  So please make sure this file is 'ignored' by your
 // source code management!
 #define AIO_USERNAME "xxxxxx"
 #define AIO_KEY "aio_xxxxx"
@@ -146,9 +146,9 @@ The [tRacket.ino](src/tRacket.ino) file can be used to program Particle Boron.  
 
 #### Motion Sensor (Brojen BJ-912)  ####
 
-The [Brojen BJ-912](https://www.amazon.com/BROJEN-Brojen-BJ-912-Curtain/dp/B07C53ZS2Y/ref=sr_1_1?dchild=1&keywords=Brojen+BJ-912&qid=1609000375&sr=8-1) motion sensor is placed directly inside the 3D enclosure.  This sensor requires 12V which is why we have a 12V supply.  
+The [Brojen BJ-912](https://www.amazon.com/BROJEN-Brojen-BJ-912-Curtain/dp/B07C53ZS2Y/ref=sr_1_1?dchild=1&keywords=Brojen+BJ-912&qid=1609000375&sr=8-1) motion sensor is placed directly inside the 3D enclosure.  This sensor requires 12V which is why we have a 12V supply. The reason I use this motion sensor device unmodified is so anyone on the court will readily identify tRacket as simply a motion sensor and not something more invasive like a camera or microphone.
 
-Changes need to be made on the inside of the motion sensor. The 'Normally Open (NO)' jumper needs to be removed and the 'LED ON' (i.e. 'Enable LED') jumper wires need to be brought outside of the sensor as shown.  The 'Enable LED' signal is set by the microcontroller as the LED is enabled with tRacket is in 'test' mode.
+Changes need to be made on the inside of the motion sensor. The 'Normally Open (NO)' jumper needs to be removed and the 'LED ON' (i.e. 'Enable LED') jumper wires need to be brought outside of the sensor as shown.  The 'Enable LED' signal is set by the microcontroller as the LED is enabled when the tRacket is in 'test' mode.  This is so under normal operation, the LED is turned off.
 
 The motion sensor should be sealed into the main 3D enclosure with exterior silicon-based caulk.  It's important to make this a waterproof seal.
 
@@ -172,7 +172,7 @@ The 'Enable LED' signal is connected to the external bus on the motion sensor as
 
 We use the [Adafruit INA219 FeatherWing Current Meter](https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout) to warn us when the 12V battery needs to be recharged. 
 
-This comes in the Featherwing form-factor so it fits on the above Featherwing Doubler along with the Particle microcontroller. It also has a small ‘experiment’ area onto which I install transistor for the motion sensor.
+This comes in the Featherwing form-factor so it fits on the above Featherwing Doubler along with the Particle microcontroller. It also has a small ‘experiment’ area onto which I install a transistor to drive the motion sensor.
 
 We currently report one of two states: ‘RECHARGE’ or ‘GOOD’.  We employ a Schmitt Trigger to determine which state we are in.  This requires two voltage thresholds:  a low (12.2 VDC) and a high (12.6 VDC). This avoids ‘oscillating’ that might happen if the voltage were to hover around a single threshold (e.g. RECHARGE, GOOD, RECHARGE, GOOD, etc.) 
 
