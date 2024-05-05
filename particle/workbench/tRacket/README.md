@@ -148,7 +148,7 @@ The [tRacket.ino](src/tRacket.ino) file can be used to program the Particle Boro
 
 The [Brojen BJ-912](https://www.amazon.com/BROJEN-Brojen-BJ-912-Curtain/dp/B07C53ZS2Y/ref=sr_1_1?dchild=1&keywords=Brojen+BJ-912&qid=1609000375&sr=8-1) motion sensor is placed directly inside the 3D enclosure.  This sensor requires 12V which is why we have a 12V supply. The reason I use this motion sensor device unmodified is so anyone on the court will readily identify tRacket as simply a motion sensor and not something more invasive like a camera or microphone.
 
-Changes need to be made on the inside of the motion sensor. The 'Normally Open (NO)' jumper needs to be removed and the 'LED ON' (i.e. 'Enable LED') jumper wires need to be brought outside of the sensor as shown.  The 'Enable LED' signal is set by the microcontroller as the LED is enabled when the tRacket is in 'test' mode.  This is so under normal operation, the LED is turned off.
+Changes need to be made on the inside of the motion sensor. The 'Normally Open (NO)' jumper needs to be ~~removed~~ (jumper should now remain in the 'Normally Closed (NC)' position) and the 'LED ON' (i.e. 'Enable LED') jumper wires need to be brought outside of the sensor as shown.  The 'Enable LED' signal is set by the microcontroller as the LED is enabled when the tRacket is in 'test' mode.  This is so under normal operation, the LED is turned off.
 
 The motion sensor should be sealed into the main 3D enclosure with exterior silicon-based caulk.  It's important to make this a waterproof seal.
 
